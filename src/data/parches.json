@@ -127,5 +127,68 @@
       "fis": 76
     },
     "foto": "maxv"
+  },
+  {
+    "id": "varela",
+    "nombre": "VARELA",
+    "posicion": "MC",
+    "posiciones": [
+      "MC",
+      "MI",
+      "MCO"
+    ],
+    "tipo": "parche",
+    "tipoStats": "campo",
+    "media": 85,
+    "stats": {
+      "rit": 84,
+      "tir": 90,
+      "pas": 87,
+      "reg": 88,
+      "def": 78,
+      "fis": 76
+    },
+    "foto": "varela"
+  },
+  {
+    "id": "mango",
+    "nombre": "MANGO",
+    "posicion": "DC",
+    "posiciones": [
+      "DC",
+      "DFC"
+    ],
+    "tipo": "parche",
+    "tipoStats": "campo",
+    "media": 84,
+    "stats": {
+      "rit": 85,
+      "tir": 86,
+      "pas": 83,
+      "reg": 83,
+      "def": 80,
+      "fis": 88
+    },
+    "foto": "mango"
+  },
+  {
+    "id": "tabach",
+    "nombre": "TABACH",
+    "posicion": "ARQ",
+    "posiciones": [
+      "ARQ"
+    ],
+    "tipo": "parche",
+    "tipoStats": "arquero",
+    "media": 80,
+    "stats": {
+      "est": 79,
+      "par": 80,
+      "saq": 90,
+      "ref": 85,
+      "vel": 80,
+      "col": 82
+    },
+    "foto": "tabach"
   }
 ]

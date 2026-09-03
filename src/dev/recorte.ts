@@ -25,6 +25,9 @@ const ZONAS: Record<string, { x0: number; x1: number; y0: number; y1: number }> 
   costas: { x0: 0.52, x1: 0.76, y0: 0.1, y1: 0.74 },
   mau: { x0: 0.26, x1: 0.84, y0: 0.05, y1: 0.93 },
   valenzflash: { x0: 0.352, x1: 0.492, y0: 0.2, y1: 0.675 },
+  varela: { x0: 0.41, x1: 0.76, y0: 0.16, y1: 0.97 },
+  mango: { x0: 0.18, x1: 0.55, y0: 0.22, y1: 0.98 },
+  tabach: { x0: 0.02, x1: 0.98, y0: 0.13, y1: 0.72 },
 }
 
 const log = (texto: string) => {
