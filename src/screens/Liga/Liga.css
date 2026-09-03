@@ -5,6 +5,17 @@
   font-size: 13px;
 }
 
+.liga__jornada-actual {
+  margin: 0 0 10px;
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--texto-tenue);
+}
+
+.liga__jornada-actual strong {
+  color: var(--oro-claro);
+}
+
 .liga__switch {
   display: flex;
   align-items: center;

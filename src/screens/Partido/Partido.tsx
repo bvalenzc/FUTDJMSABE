@@ -1,13 +1,12 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { FORMACIONES, sobrePorId } from '../../config/juego'
-import { copaInfo, jornadasTotales, type EquipoLiga, type GrupoLiga } from '../../config/liga'
+import { GRUPO_DJM, copaInfo, type EquipoLiga, type GrupoLiga } from '../../config/liga'
 import { grupoPorId } from '../../config/liga'
 import {
   aplicarResultadoDeFecha,
   clasificacion,
   djmEsLocal,
   rivalDeFecha,
-  simularRestoDeFecha,
   type LigaGuardado,
   type ResultadoPartido,
 } from '../../juego/liga'
@@ -21,19 +20,18 @@ import { Pantalla } from '../../components/Pantalla/Pantalla'
 import type { Jugador, StatsArquero, StatsCampo } from '../../types/jugador'
 import './Partido.css'
 
-type Recompensa = { monedas: number; packs: string[] }
+type Recompensa = { monedas: number; packs: string[]; mvpId: string | null }
 
 type Props = { onVolver: () => void; onFin: () => void }
 
-type Evento = {
-  minuto: number
-  equipo: 'djm' | 'rival'
-}
-
-type EventoResuelto = Evento & { exito: boolean }
+type TipoEvento = 'ataque' | 'defensa' | 'tarjeta' | 'lesion'
+type Evento = { minuto: number; tipo: TipoEvento; equipo: 'djm' | 'rival' }
+type EventoResuelto = Evento & { exito?: boolean }
 
 const PACKS_GANA = ['veliz', 'djm']
 const PACKS_PIERDE = ['euforia', 'nuende']
+/** Penalización de fuerza (sobre 99) que deja una tarjeta roja para lo que resta del partido. */
+const PENALIZACION_ROJA = 9
 
 function clamp(n: number, min: number, max: number) {
   return Math.min(max, Math.max(min, n))
@@ -43,11 +41,20 @@ function probabilidadEvento(propio: number, rivalPoder: number, mediaEquipo: num
   return clamp(0.32 + (propio - rivalPoder) / 160 + (mediaEquipo - rivalPoder) / 300, 0.14, 0.88)
 }
 
+/** 8 a 12 eventos por partido: la mayoría chances de gol, más alguna tarjeta o lesión. */
 function generarEventos(mediaDjm: number, rivalPoder: number): Evento[] {
-  const total = 5 + Math.floor(Math.random() * 3)
+  const total = 8 + Math.floor(Math.random() * 5)
   const probDjm = mediaDjm / (mediaDjm + rivalPoder)
   const minutos = Array.from({ length: total }, () => 1 + Math.floor(Math.random() * 89)).sort((a, b) => a - b)
-  return minutos.map((minuto) => ({ minuto, equipo: Math.random() < probDjm ? 'djm' : 'rival' }))
+  return minutos.map((minuto) => {
+    const r = Math.random()
+    if (r < 0.65) {
+      const equipo: 'djm' | 'rival' = Math.random() < probDjm ? 'djm' : 'rival'
+      return { minuto, tipo: equipo === 'djm' ? 'ataque' : 'defensa', equipo }
+    }
+    const tipo: TipoEvento = r < 0.85 ? 'tarjeta' : 'lesion'
+    return { minuto, tipo, equipo: Math.random() < 0.5 ? 'djm' : 'rival' }
+  })
 }
 
 export function Partido({ onVolver, onFin }: Props) {
@@ -58,7 +65,7 @@ export function Partido({ onVolver, onFin }: Props) {
   // el equipo pendiente vacío, así que no sirve para seguir armando este mismo partido.
   const [partido] = useState(() => {
     const liga = guardado.liga
-    const grupo = liga ? grupoPorId(liga.grupoId) : undefined
+    const grupo = liga ? grupoPorId(GRUPO_DJM) : undefined
     const rival = grupo && liga ? rivalDeFecha(grupo, liga.jornada) : null
     const equipo = liga?.equipoPendiente ?? null
     return {
@@ -82,7 +89,12 @@ export function Partido({ onVolver, onFin }: Props) {
   const [indiceEvento, indiceEventoSet] = useState(0)
   const [eventoActivo, eventoActivoSet] = useState(false)
   const [historial, historialSet] = useState<EventoResuelto[]>([])
+  const [flavor, flavorSet] = useState<string | null>(null)
   const [recompensa, recompensaSet] = useState<Recompensa | null>(null)
+  const [minutoMostrado, minutoMostradoSet] = useState(0)
+  const [penalDjm, penalDjmSet] = useState(0)
+  const [penalRival, penalRivalSet] = useState(0)
+  const [contribuciones, contribucionesSet] = useState<Record<string, number>>({})
 
   const eventos = useMemo(() => (equipo && rival ? generarEventos(equipo.media, rival.poder) : []), [equipo, rival])
 
@@ -100,39 +112,117 @@ export function Partido({ onVolver, onFin }: Props) {
   const slots = FORMACIONES[equipo.formacion] ?? []
 
   const portero = titulares[0] ? jugadorPorId(titulares[0]) : undefined
-  const atacantesPosibles = titulares
-    .slice(1)
-    .filter((id): id is string => !!id)
-    .map((id) => jugadorPorId(id))
-    .filter((j): j is Jugador => !!j)
+  const indicesConJugador = titulares.map((id, i) => (id ? i : -1)).filter((i) => i >= 0)
 
-  const jugadorDelEvento: Jugador | undefined =
-    evento?.equipo === 'djm'
-      ? atacantesPosibles[Math.floor(Math.random() * Math.max(1, atacantesPosibles.length))] ?? portero
-      : portero
+  // Un solo protagonista por evento, elegido cuando el evento aparece (no en cada
+  // render): si se recalculara siempre, el reloj animándose de fondo lo cambiaría
+  // varias veces por segundo mientras el jugador todavía está mirando la tarjeta.
+  const jugadorDelEvento: Jugador | undefined = useMemo(() => {
+    if (!evento) return undefined
+    if (evento.tipo === 'defensa') return portero
+    if (evento.equipo !== 'djm') return undefined
+    if (evento.tipo === 'ataque') {
+      const posibles = titulares
+        .slice(1)
+        .filter((id): id is string => !!id)
+        .map((id) => jugadorPorId(id))
+        .filter((j): j is Jugador => !!j)
+      return posibles[Math.floor(Math.random() * Math.max(1, posibles.length))]
+    }
+    // tarjeta o lesión de DJM: cualquiera de la cancha
+    const id = titulares[indicesConJugador[Math.floor(Math.random() * Math.max(1, indicesConJugador.length))] ?? 0]
+    return id ? jugadorPorId(id) : undefined
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [indiceEvento, fase])
 
   const probabilidadDelEvento = (() => {
     if (!evento || !jugadorDelEvento) return 0.5
-    if (evento.equipo === 'djm') {
+    const rivalPoder = rival.poder + penalRival
+    if (evento.tipo === 'ataque') {
       const tir = (jugadorDelEvento.stats as StatsCampo).tir ?? jugadorDelEvento.media
-      return probabilidadEvento(tir, rival.poder, equipo.media)
+      return probabilidadEvento(tir, rivalPoder, equipo.media - penalDjm)
     }
     const par = (jugadorDelEvento.stats as StatsArquero).par ?? jugadorDelEvento.media
-    return probabilidadEvento(par, rival.poder, equipo.media)
+    return probabilidadEvento(par, rivalPoder, equipo.media - penalDjm)
   })()
 
-  const resolverEvento = (exito: boolean) => {
-    if (evento?.equipo === 'djm' && exito) golesDjmSet((g) => g + 1)
-    if (evento?.equipo === 'rival' && !exito) golesRivalSet((g) => g + 1)
-    historialSet((h) => [...h, { ...evento!, exito }])
-    eventoActivoSet(false)
+  // El reloj sube animado hacia el minuto del próximo evento antes de mostrar su tarjeta.
+  // Con setInterval en vez de requestAnimationFrame: el rAF se pausa si la pestaña
+  // pierde el foco a mitad de partido, y el reloj se quedaría trabado.
+  useEffect(() => {
+    if (fase !== 'jugando' || !evento) return
+    const desde = minutoMostrado
+    const hasta = evento.minuto
+    if (desde >= hasta) return
+    const inicio = Date.now()
+    const duracion = clamp((hasta - desde) * 45, 250, 1200)
+    const intervalo = window.setInterval(() => {
+      const t = Math.min(1, (Date.now() - inicio) / duracion)
+      minutoMostradoSet(Math.round(desde + (hasta - desde) * t))
+      if (t >= 1) window.clearInterval(intervalo)
+    }, 40)
+    return () => window.clearInterval(intervalo)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [indiceEvento, fase])
+
+  const avanzarEvento = () => {
     const siguiente = indiceEvento + 1
-    if (siguiente >= eventos.length) {
-      faseSet('final')
-    } else {
-      indiceEventoSet(siguiente)
-    }
+    if (siguiente >= eventos.length) faseSet('final')
+    else indiceEventoSet(siguiente)
+    eventoActivoSet(false)
+    flavorSet(null)
   }
+
+  const resolverEvento = (exito: boolean) => {
+    if (evento?.tipo === 'ataque' && exito) {
+      golesDjmSet((g) => g + 1)
+      if (jugadorDelEvento) contribucionesSet((c) => ({ ...c, [jugadorDelEvento.id]: (c[jugadorDelEvento.id] ?? 0) + 2 }))
+    }
+    if (evento?.tipo === 'defensa' && !exito) golesRivalSet((g) => g + 1)
+    if (evento?.tipo === 'defensa' && exito && jugadorDelEvento) {
+      contribucionesSet((c) => ({ ...c, [jugadorDelEvento.id]: (c[jugadorDelEvento.id] ?? 0) + 1 }))
+    }
+    historialSet((h) => [...h, { ...evento!, exito }])
+    avanzarEvento()
+  }
+
+  // Tarjetas y lesiones no se juegan: se muestran solas y siguen a los pocos segundos.
+  useEffect(() => {
+    if (fase !== 'jugando' || !evento || evento.tipo === 'ataque' || evento.tipo === 'defensa') return
+    if (minutoMostrado !== evento.minuto) return
+
+    if (evento.tipo === 'tarjeta') {
+      const roja = Math.random() < 0.35
+      const quien = evento.equipo === 'djm' && jugadorDelEvento ? jugadorDelEvento.nombre : `un jugador de ${rival.nombre}`
+      flavorSet(`${roja ? '🟥' : '🟨'} Tarjeta ${roja ? 'roja' : 'amarilla'} para ${quien}.`)
+      if (roja) {
+        if (evento.equipo === 'djm') penalDjmSet((p) => p + PENALIZACION_ROJA)
+        else penalRivalSet((p) => p + PENALIZACION_ROJA)
+      }
+    } else {
+      if (evento.equipo === 'djm' && jugadorDelEvento) {
+        const indiceLesionado = titulares.indexOf(jugadorDelEvento.id)
+        const indiceBanco = suplentes.findIndex((id) => !!id)
+        if (indiceLesionado >= 0 && indiceBanco >= 0) {
+          const entra = jugadorPorId(suplentes[indiceBanco]!)
+          titularesSet((prev) => prev.map((x, i) => (i === indiceLesionado ? suplentes[indiceBanco] : x)))
+          suplentesSet((prev) => prev.map((x, i) => (i === indiceBanco ? jugadorDelEvento.id : x)))
+          flavorSet(`🩹 Se lesiona ${jugadorDelEvento.nombre}. Entra ${entra?.nombre ?? 'un suplente'}.`)
+        } else {
+          flavorSet(`🩹 ${jugadorDelEvento.nombre} queda dolorido, pero sigue jugando.`)
+        }
+      } else {
+        flavorSet(`🩹 Se lesiona un jugador de ${rival.nombre}. Sigue en cancha.`)
+      }
+    }
+
+    const espera = window.setTimeout(() => {
+      historialSet((h) => [...h, evento])
+      avanzarEvento()
+    }, 2200)
+    return () => window.clearTimeout(espera)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [minutoMostrado, indiceEvento, fase])
 
   const terminarYRecompensar = () => {
     if (yaRecompenso.current || !guardado.liga) return
@@ -141,8 +231,7 @@ export function Partido({ onVolver, onFin }: Props) {
     const resultadoDjm: ResultadoPartido = local
       ? { jornada, local: 'djm', visita: rival.id, golesLocal: golesDjm, golesVisita: golesRival }
       : { jornada, local: rival.id, visita: 'djm', golesLocal: golesRival, golesVisita: golesDjm }
-    const resto = simularRestoDeFecha(grupo, jornada)
-    const nuevaLiga = aplicarResultadoDeFecha(guardado.liga, resultadoDjm, resto)
+    const nuevaLiga = aplicarResultadoDeFecha(guardado.liga, resultadoDjm, GRUPO_DJM)
     guardarResultadoLiga(nuevaLiga)
 
     const gano = golesDjm > golesRival
@@ -158,7 +247,16 @@ export function Partido({ onVolver, onFin }: Props) {
       packs.push(id)
     }
 
-    recompensaSet({ monedas, packs })
+    let mvpId: string | null = null
+    if (gano) {
+      const entradas = Object.entries(contribuciones)
+      if (entradas.length) {
+        entradas.sort((a, b) => b[1] - a[1] || (jugadorPorId(b[0])?.media ?? 0) - (jugadorPorId(a[0])?.media ?? 0))
+        mvpId = entradas[0][0]
+      }
+    }
+
+    recompensaSet({ monedas, packs, mvpId })
     faseSet('recompensa')
   }
 
@@ -187,20 +285,22 @@ export function Partido({ onVolver, onFin }: Props) {
     seleccionSubSet(null)
   }
 
+  const listoParaMostrar = fase === 'jugando' && evento && minutoMostrado === evento.minuto
+
   return (
     <Pantalla titulo={`Liga · Fecha ${jornada}`} onVolver={fase === 'recompensa' ? undefined : onVolver}>
       {fase === 'previa' && (
         <div className="partido__previa">
+          <div className="partido__previa-cesped" aria-hidden="true" />
           <div className="partido__previa-lado">
-            <EscudoEquipo equipo={{ id: 'djm', nombre: 'Don Julio De Milan', esDjm: true, poder: equipo.media }} tamano={72} />
+            <EscudoEquipo equipo={{ id: 'djm', nombre: 'Don Julio De Milan', esDjm: true, poder: equipo.media }} tamano={84} />
             <strong>DJM</strong>
             <span>Media {equipo.media}</span>
           </div>
           <span className="partido__previa-vs">VS</span>
           <div className="partido__previa-lado">
-            <EscudoEquipo equipo={rival} tamano={72} />
+            <EscudoEquipo equipo={rival} tamano={84} />
             <strong>{rival.nombre}</strong>
-            <span>Nivel {rival.poder}</span>
           </div>
           <button type="button" className="boton-oro partido__comenzar" onClick={() => faseSet('jugando')}>
             COMENZAR PARTIDO
@@ -211,52 +311,67 @@ export function Partido({ onVolver, onFin }: Props) {
       {(fase === 'jugando' || fase === 'final') && (
         <>
           <div className="partido__marcador">
+            <div className="partido__cesped-marcador" aria-hidden="true" />
             <div className="partido__equipo">
-              <EscudoEquipo equipo={{ id: 'djm', nombre: 'DJM', esDjm: true, poder: 0 }} tamano={30} />
+              <EscudoEquipo equipo={{ id: 'djm', nombre: 'DJM', esDjm: true, poder: 0 }} tamano={32} />
               <span>DJM</span>
             </div>
             <div className="partido__goles">
-              <strong>{golesDjm}</strong>
-              <em>{fase === 'final' ? 'FINAL' : `${evento?.minuto ?? 90}'`}</em>
-              <strong>{golesRival}</strong>
+              <strong key={`dj-${golesDjm}`} className="partido__gol-numero">
+                {golesDjm}
+              </strong>
+              <em>{fase === 'final' ? 'FINAL' : `${minutoMostrado}'`}</em>
+              <strong key={`riv-${golesRival}`} className="partido__gol-numero">
+                {golesRival}
+              </strong>
             </div>
             <div className="partido__equipo partido__equipo--rival">
               <span>{rival.nombre}</span>
-              <EscudoEquipo equipo={rival} tamano={30} />
+              <EscudoEquipo equipo={rival} tamano={32} />
             </div>
+          </div>
+
+          <div className="partido__reloj-barra">
+            <span style={{ width: `${(minutoMostrado / 90) * 100}%` }} />
           </div>
 
           <div className="partido__momentum">
             {eventos.map((e, i) => {
               const resuelto = historial[i]
               let clase = 'partido__punto'
-              if (resuelto) clase += resuelto.exito ? ' partido__punto--exito' : ' partido__punto--fallo'
+              if (e.tipo === 'tarjeta') clase += ' partido__punto--tarjeta'
+              else if (e.tipo === 'lesion') clase += ' partido__punto--lesion'
+              else if (resuelto) clase += resuelto.exito ? ' partido__punto--exito' : ' partido__punto--fallo'
               clase += e.equipo === 'djm' ? ' partido__punto--djm' : ' partido__punto--rival'
               return <span key={i} className={clase} style={{ left: `${(e.minuto / 90) * 100}%` }} />
             })}
             <span className="partido__momentum-linea" />
           </div>
 
-          {fase === 'jugando' && evento && jugadorDelEvento && !eventoActivo && (
-            <div className="partido__chance tarjeta">
-              <span className="eyebrow">
-                {evento.equipo === 'djm' ? 'CHANCE DE GOL' : 'PELIGRO EN TU ARCO'}
-              </span>
+          {fase === 'jugando' && listoParaMostrar && (evento!.tipo === 'ataque' || evento!.tipo === 'defensa') && jugadorDelEvento && !eventoActivo && (
+            <div key={indiceEvento} className="partido__chance tarjeta partido__aparece">
+              <span className="eyebrow">{evento!.tipo === 'ataque' ? 'CHANCE DE GOL' : 'PELIGRO EN TU ARCO'}</span>
               <p>
-                {evento.equipo === 'djm'
+                {evento!.tipo === 'ataque'
                   ? `${jugadorDelEvento.nombre} queda mano a mano con el arquero rival.`
                   : `${rival.nombre} se escapa y ${jugadorDelEvento.nombre} tiene que salir a tapar.`}
               </p>
               <button type="button" className="boton-oro" onClick={() => eventoActivoSet(true)}>
-                {evento.equipo === 'djm' ? 'ATACAR' : 'DEFENDER'}
+                {evento!.tipo === 'ataque' ? 'ATACAR' : 'DEFENDER'}
               </button>
             </div>
           )}
 
-          {fase === 'jugando' && evento && jugadorDelEvento && eventoActivo && (
-            <div className="partido__minijuego-caja tarjeta">
+          {fase === 'jugando' && listoParaMostrar && (evento!.tipo === 'tarjeta' || evento!.tipo === 'lesion') && flavor && (
+            <div key={indiceEvento} className="partido__chance partido__chance--flavor tarjeta partido__aparece">
+              <p>{flavor}</p>
+            </div>
+          )}
+
+          {fase === 'jugando' && listoParaMostrar && jugadorDelEvento && eventoActivo && (
+            <div className="partido__minijuego-caja tarjeta partido__aparece">
               <Minijuego
-                modo={evento.equipo === 'djm' ? 'ataque' : 'defensa'}
+                modo={evento!.tipo === 'ataque' ? 'ataque' : 'defensa'}
                 jugador={jugadorDelEvento}
                 rival={rival}
                 probabilidad={probabilidadDelEvento}
@@ -266,7 +381,7 @@ export function Partido({ onVolver, onFin }: Props) {
           )}
 
           {fase === 'final' && (
-            <div className="partido__fin tarjeta">
+            <div className="partido__fin tarjeta partido__aparece">
               <p className="eyebrow">PARTIDO TERMINADO</p>
               <strong>
                 {golesDjm > golesRival ? 'GANASTE' : golesDjm === golesRival ? 'EMPATASTE' : 'PERDISTE'} {golesDjm}-{golesRival}
@@ -367,9 +482,10 @@ function PantallaRecompensa({
   recompensa: Recompensa
   onFin: () => void
 }) {
-  const filas = clasificacion(grupo, liga.tabla)
-  const total = jornadasTotales(grupo)
-  const terminada = liga.jornada > total
+  const filas = clasificacion(grupo, liga.tablas[grupo.id])
+  const terminada = liga.fase === 'copas'
+  const copaDjm = liga.copas?.['djm']
+  const mvp = recompensa.mvpId ? jugadorPorId(recompensa.mvpId) : null
 
   return (
     <div className="partido__recompensa">
@@ -379,6 +495,13 @@ function PantallaRecompensa({
       <strong className="partido__recompensa-marcador">
         {golesDjm} - {golesRival}
       </strong>
+
+      {mvp && (
+        <div className="partido__mvp">
+          <span className="eyebrow">MVP DEL PARTIDO</span>
+          <Carta jugador={mvp} tamano={120} />
+        </div>
+      )}
 
       <div className="partido__recompensa-premios tarjeta">
         <span className="partido__recompensa-monedas">
@@ -410,12 +533,10 @@ function PantallaRecompensa({
         ))}
       </div>
 
-      {terminada && liga.copaAsignada && (
-        <div className="liga__final" style={{ borderColor: copaInfo(liga.copaAsignada).color, marginTop: 14 }}>
+      {terminada && copaDjm && (
+        <div className="liga__final" style={{ borderColor: copaInfo(copaDjm).color, marginTop: 14 }}>
           <span className="rotulo">Fase de grupos terminada</span>
-          <strong style={{ color: copaInfo(liga.copaAsignada).color }}>
-            Clasificaste a {copaInfo(liga.copaAsignada).nombre}
-          </strong>
+          <strong style={{ color: copaInfo(copaDjm).color }}>Clasificaste a {copaInfo(copaDjm).nombre}</strong>
         </div>
       )}
 

@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { GRUPOS_LIGA, copaDePuesto, copaInfo, jornadasTotales } from '../../config/liga'
-import { clasificacion, ligaInicial } from '../../juego/liga'
+import { GRUPOS_LIGA, GRUPO_DJM, copaInfo, jornadasTotales, type Copa } from '../../config/liga'
+import { clasificacion } from '../../juego/liga'
 import { useJuego } from '../../juego/useJuego'
 import { EscudoEquipo } from '../../components/EscudoEquipo/EscudoEquipo'
 import { Pantalla } from '../../components/Pantalla/Pantalla'
@@ -12,10 +12,10 @@ export function Liga({ onVolver, onJugarFecha }: Props) {
   const { guardado } = useJuego()
   const liga = guardado.liga
 
-  const indiceGrupoDjm = liga ? GRUPOS_LIGA.findIndex((g) => g.id === liga.grupoId) : 0
+  const indiceGrupoDjm = GRUPOS_LIGA.findIndex((g) => g.id === GRUPO_DJM)
   const [indiceVisto, indiceVistoSet] = useState(indiceGrupoDjm)
   const grupo = GRUPOS_LIGA[indiceVisto]
-  const esGrupoDjm = liga?.grupoId === grupo.id
+  const esGrupoDjm = grupo.id === GRUPO_DJM
 
   if (!liga) {
     return (
@@ -25,10 +25,10 @@ export function Liga({ onVolver, onJugarFecha }: Props) {
     )
   }
 
-  const tabla = esGrupoDjm ? liga.tabla : ligaInicial(grupo.id).tabla
-  const filas = clasificacion(grupo, tabla)
+  const filas = clasificacion(grupo, liga.tablas[grupo.id])
   const total = jornadasTotales(grupo)
-  const temporadaTerminada = esGrupoDjm && liga.jornada > total
+  const temporadaTerminada = liga.fase === 'copas'
+  const copaDjm = liga.copas?.['djm']
 
   return (
     <Pantalla titulo="Liga" onVolver={onVolver}>
@@ -55,6 +55,12 @@ export function Liga({ onVolver, onJugarFecha }: Props) {
         </button>
       </div>
 
+      {!temporadaTerminada && (
+        <p className="liga__jornada-actual">
+          Fecha <strong>{Math.min(liga.jornada, total)}</strong> de {total}
+        </p>
+      )}
+
       <div className="liga__tabla tarjeta">
         <div className="liga__fila liga__fila--cabecera">
           <span className="liga__pos">#</span>
@@ -68,12 +74,12 @@ export function Liga({ onVolver, onJugarFecha }: Props) {
         </div>
         {filas.map((fila, i) => {
           const puesto = i + 1
-          const copa = copaInfo(copaDePuesto(puesto))
+          const copa = liga.copas?.[fila.id]
           return (
             <div key={fila.id} className={`liga__fila${fila.equipo.esDjm ? ' liga__fila--djm' : ''}`}>
               <span className="liga__pos">
                 {puesto}
-                <i className="liga__pastilla-copa" style={{ background: copa.color }} title={copa.nombre} />
+                {copa && <i className="liga__pastilla-copa" style={{ background: copaInfo(copa).color }} title={copaInfo(copa).nombre} />}
               </span>
               <span className="liga__equipo">
                 <EscudoEquipo equipo={fila.equipo} tamano={24} />
@@ -90,25 +96,25 @@ export function Liga({ onVolver, onJugarFecha }: Props) {
         })}
       </div>
 
-      <div className="liga__leyenda">
-        {['oro', 'plata', 'bronce', 'plumavit'].map((c) => {
-          const info = copaInfo(c as 'oro' | 'plata' | 'bronce' | 'plumavit')
-          return (
-            <span key={c} className="liga__leyenda-item">
-              <i style={{ background: info.color }} /> {info.nombre}
-            </span>
-          )
-        })}
-      </div>
+      {temporadaTerminada && (
+        <div className="liga__leyenda">
+          {(['oro', 'plata', 'bronce', 'plumavit'] as Copa[]).map((c) => {
+            const info = copaInfo(c)
+            return (
+              <span key={c} className="liga__leyenda-item">
+                <i style={{ background: info.color }} /> {info.nombre}
+              </span>
+            )
+          })}
+        </div>
+      )}
 
       {esGrupoDjm && (
         <div className="liga__accion">
-          {temporadaTerminada && liga.copaAsignada ? (
-            <div className="liga__final" style={{ borderColor: copaInfo(liga.copaAsignada).color }}>
+          {temporadaTerminada && copaDjm ? (
+            <div className="liga__final" style={{ borderColor: copaInfo(copaDjm).color }}>
               <span className="rotulo">Fase de grupos terminada</span>
-              <strong style={{ color: copaInfo(liga.copaAsignada).color }}>
-                Clasificaste a {copaInfo(liga.copaAsignada).nombre}
-              </strong>
+              <strong style={{ color: copaInfo(copaDjm).color }}>Clasificaste a {copaInfo(copaDjm).nombre}</strong>
             </div>
           ) : liga.equipoPendiente ? (
             <button type="button" className="boton-oro liga__boton-fecha" onClick={onJugarFecha}>

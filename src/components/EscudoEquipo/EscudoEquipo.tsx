@@ -1,5 +1,6 @@
 import type { EquipoLiga } from '../../config/liga'
 import escudoDjm from '../../assets/marca/escudo_djm.png'
+import { obtenerEscudo } from '../../assets/escudos'
 import './EscudoEquipo.css'
 
 const COLORES = ['#7c5cff', '#4fb3d9', '#e8965a', '#5cc98a', '#d95c7a', '#c9a24b', '#5c8fd9', '#a45cd9']
@@ -21,13 +22,25 @@ function inicialesDe(nombre: string): string {
 
 type Props = { equipo: EquipoLiga; tamano?: number }
 
-/** Escudo del equipo: el real para DJM, uno genérico con iniciales para el resto. */
+/** Escudo del equipo: el real de DJM o el recortado de la tabla de la liga; si falta, iniciales. */
 export function EscudoEquipo({ equipo, tamano = 32 }: Props) {
   if (equipo.esDjm) {
     return (
       <img
         className="escudo-equipo escudo-equipo--djm"
         src={escudoDjm}
+        alt={equipo.nombre}
+        style={{ width: tamano, height: tamano }}
+      />
+    )
+  }
+
+  const real = obtenerEscudo(equipo.id)
+  if (real) {
+    return (
+      <img
+        className="escudo-equipo escudo-equipo--real"
+        src={real}
         alt={equipo.nombre}
         style={{ width: tamano, height: tamano }}
       />

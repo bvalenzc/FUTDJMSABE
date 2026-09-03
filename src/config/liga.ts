@@ -113,14 +113,6 @@ export const COPAS: { id: Copa; nombre: string; color: string }[] = [
   { id: 'plumavit', nombre: 'Copa Plumavit', color: '#8fd4a8' },
 ]
 
-/** Puesto 1-8 -> copa a la que clasifica (1ro y 2do oro, 3ro y 4to plata, etc). */
-export function copaDePuesto(puesto: number): Copa {
-  if (puesto <= 2) return 'oro'
-  if (puesto <= 4) return 'plata'
-  if (puesto <= 6) return 'bronce'
-  return 'plumavit'
-}
-
 export function copaInfo(copa: Copa) {
   return COPAS.find((c) => c.id === copa)!
 }

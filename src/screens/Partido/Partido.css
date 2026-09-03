@@ -8,11 +8,22 @@
 /* ---------- previa ---------- */
 
 .partido__previa {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 14px;
-  margin-top: 30px;
+  margin: -14px -18px 0;
+  padding: 44px 18px 28px;
+  overflow: hidden;
+}
+
+.partido__previa-cesped {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.035) 0 26px, transparent 26px 52px),
+    linear-gradient(180deg, #1d4128, #0a1810 75%, var(--tinta) 100%);
 }
 
 .partido__previa-lado {
@@ -24,8 +35,9 @@
 
 .partido__previa-lado strong {
   font-family: 'Anton', sans-serif;
-  font-size: 15px;
+  font-size: 16px;
   letter-spacing: 0.5px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
 }
 
 .partido__previa-lado span {
@@ -35,8 +47,9 @@
 
 .partido__previa-vs {
   font-family: 'Anton', sans-serif;
-  font-size: 18px;
+  font-size: 20px;
   color: var(--oro-claro);
+  text-shadow: 0 0 14px rgba(232, 197, 101, 0.5);
 }
 
 .partido__comenzar {
@@ -47,10 +60,21 @@
 /* ---------- marcador ---------- */
 
 .partido__marcador {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 10px;
+  margin: -14px -18px 0;
+  padding: 14px 18px;
+  overflow: hidden;
+}
+
+.partido__cesped-marcador {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, #17331f, #0b1a11 80%, var(--tinta) 100%);
 }
 
 .partido__equipo {
@@ -83,11 +107,42 @@
   font-size: 26px;
 }
 
+.partido__gol-numero {
+  display: inline-block;
+  animation: partido-gol-pop 0.4s cubic-bezier(0.3, 1.6, 0.4, 1);
+}
+
+@keyframes partido-gol-pop {
+  0% {
+    transform: scale(1.9);
+    color: var(--oro-claro);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 .partido__goles em {
   font-style: normal;
   font-size: 10px;
   font-weight: 700;
   color: var(--texto-tenue);
+  min-width: 26px;
+  text-align: center;
+}
+
+.partido__reloj-barra {
+  height: 3px;
+  margin: 0 -18px;
+  background: var(--superficie-2);
+  overflow: hidden;
+}
+
+.partido__reloj-barra span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--oro), var(--oro-claro));
+  transition: width 0.2s linear;
 }
 
 /* ---------- momentum ---------- */
@@ -95,7 +150,7 @@
 .partido__momentum {
   position: relative;
   height: 20px;
-  margin: 16px 2px 0;
+  margin: 14px 2px 0;
 }
 
 .partido__momentum-linea {
@@ -134,6 +189,16 @@
   background: var(--rojo-claro);
 }
 
+.partido__punto--tarjeta {
+  background: #e8c565;
+  box-shadow: 0 0 0 2px rgba(232, 197, 101, 0.35);
+}
+
+.partido__punto--lesion {
+  background: #cf7982;
+  box-shadow: 0 0 0 2px rgba(207, 121, 130, 0.35);
+}
+
 /* ---------- eventos ---------- */
 
 .partido__chance,
@@ -150,8 +215,37 @@
   color: var(--texto-medio);
 }
 
+.partido__chance--flavor p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--texto);
+}
+
 .partido__minijuego-caja {
   padding: 0;
+}
+
+@keyframes partido-aparece {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.partido__aparece {
+  animation: partido-aparece 0.32s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .partido__aparece,
+  .partido__gol-numero {
+    animation: none;
+  }
 }
 
 .partido__fin strong {
@@ -226,6 +320,18 @@
   margin: 6px 0 16px;
   font-family: 'Anton', sans-serif;
   font-size: 32px;
+}
+
+.partido__mvp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.partido__mvp .eyebrow {
+  color: var(--oro-claro);
 }
 
 .partido__recompensa-premios {

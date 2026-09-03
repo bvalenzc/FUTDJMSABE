@@ -9,7 +9,7 @@ export type DraftGuardado = {
 }
 
 import type { Jugador } from '../types/jugador'
-import type { LigaGuardado } from './liga'
+import { VERSION_LIGA, type LigaGuardado } from './liga'
 
 export type Guardado = {
   monedas: number
@@ -47,7 +47,10 @@ export function leerGuardado(): Guardado {
   try {
     const crudo = localStorage.getItem(CLAVE)
     if (!crudo) return { ...GUARDADO_INICIAL }
-    return { ...GUARDADO_INICIAL, ...(JSON.parse(crudo) as Partial<Guardado>) }
+    const guardado = { ...GUARDADO_INICIAL, ...(JSON.parse(crudo) as Partial<Guardado>) }
+    // Una liga de un formato viejo (menos o más grupos, otra forma de tabla) no sirve: se arranca de cero.
+    if (guardado.liga && guardado.liga.version !== VERSION_LIGA) guardado.liga = null
+    return guardado
   } catch {
     return { ...GUARDADO_INICIAL }
   }

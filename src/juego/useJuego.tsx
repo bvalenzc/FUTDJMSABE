@@ -1,7 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { escribirGuardado, GUARDADO_INICIAL, leerGuardado, type DraftGuardado, type Guardado } from './estado'
 import { ligaInicial, type LigaGuardado } from './liga'
-import { GRUPO_DJM } from '../config/liga'
 import { sincronizarPropias } from './roster'
 import type { Jugador } from '../types/jugador'
 
@@ -131,7 +130,7 @@ export function ProveedorJuego({ children }: { children: ReactNode }) {
   const enviarEquipoALiga = useCallback((draft: DraftGuardado) => {
     setGuardado((g) => ({
       ...g,
-      liga: { ...(g.liga ?? ligaInicial(GRUPO_DJM)), equipoPendiente: draft },
+      liga: { ...(g.liga ?? ligaInicial()), equipoPendiente: draft },
     }))
   }, [])
 
