@@ -9,7 +9,7 @@ import './Liga.css'
 type Props = { onVolver: () => void; onJugarFecha: () => void }
 
 export function Liga({ onVolver, onJugarFecha }: Props) {
-  const { guardado } = useJuego()
+  const { guardado, reiniciarLiga } = useJuego()
   const liga = guardado.liga
 
   const indiceGrupoDjm = GRUPOS_LIGA.findIndex((g) => g.id === GRUPO_DJM)
@@ -125,6 +125,10 @@ export function Liga({ onVolver, onJugarFecha }: Props) {
           )}
         </div>
       )}
+
+      <button type="button" className="liga__reiniciar" onClick={reiniciarLiga}>
+        Reiniciar liga desde cero
+      </button>
     </Pantalla>
   )
 }

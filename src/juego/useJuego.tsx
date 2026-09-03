@@ -22,6 +22,8 @@ type Acciones = {
   /** Manda el equipo recién armado en el draft a la liga, listo para jugar la próxima fecha. */
   enviarEquipoALiga: (draft: DraftGuardado) => void
   guardarResultadoLiga: (liga: LigaGuardado) => void
+  /** Borra toda la tabla, resultados y copas: la próxima liga arranca de cero en la fecha 1. */
+  reiniciarLiga: () => void
   reiniciar: () => void
 }
 
@@ -138,6 +140,10 @@ export function ProveedorJuego({ children }: { children: ReactNode }) {
     setGuardado((g) => ({ ...g, liga }))
   }, [])
 
+  const reiniciarLiga = useCallback(() => {
+    setGuardado((g) => ({ ...g, liga: null }))
+  }, [])
+
   const crearCarta = useCallback((carta: Jugador) => {
     let ok = false
     setGuardado((g) => {
@@ -178,6 +184,7 @@ export function ProveedorJuego({ children }: { children: ReactNode }) {
       registrarPackGratis,
       enviarEquipoALiga,
       guardarResultadoLiga,
+      reiniciarLiga,
       reiniciar,
     }),
     [
@@ -197,6 +204,7 @@ export function ProveedorJuego({ children }: { children: ReactNode }) {
       registrarPackGratis,
       enviarEquipoALiga,
       guardarResultadoLiga,
+      reiniciarLiga,
       reiniciar,
     ],
   )

@@ -184,3 +184,15 @@
   font-size: 17px;
   letter-spacing: 0.6px;
 }
+
+.liga__reiniciar {
+  display: block;
+  margin: 22px auto 4px;
+  padding: 4px;
+  border: none;
+  background: none;
+  font-size: 10.5px;
+  text-decoration: underline;
+  color: var(--texto-tenue);
+  cursor: pointer;
+}
