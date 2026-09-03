@@ -283,7 +283,7 @@
     ],
     "tipo": "plantel",
     "tipoStats": "campo",
-    "media": 90,
+    "media": 88,
     "rareza": "flashback",
     "stats": {
       "rit": 87,
@@ -293,11 +293,11 @@
       "def": 72,
       "fis": 82
     },
-    "foto": "valenz",
+    "foto": "valenzflash",
     "encuadre": {
-      "alto": 300,
-      "abajo": -18,
-      "x": 0
+      "alto": 326,
+      "abajo": 10,
+      "x": 4
     }
   }
 ]

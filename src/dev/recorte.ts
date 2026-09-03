@@ -24,6 +24,7 @@ const ZONAS: Record<string, { x0: number; x1: number; y0: number; y1: number }> 
   puente: { x0: 0.36, x1: 0.75, y0: 0.1, y1: 0.88 },
   costas: { x0: 0.52, x1: 0.76, y0: 0.1, y1: 0.74 },
   mau: { x0: 0.26, x1: 0.84, y0: 0.05, y1: 0.93 },
+  valenzflash: { x0: 0.352, x1: 0.492, y0: 0.2, y1: 0.675 },
 }
 
 const log = (texto: string) => {
