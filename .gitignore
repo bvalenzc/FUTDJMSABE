@@ -5,3 +5,8 @@ dist-ssr
 *.local
 .DS_Store
 dev-dist
+
+# generados por tsc -b
+tsconfig.tsbuildinfo
+vite.config.js
+vite.config.d.ts
