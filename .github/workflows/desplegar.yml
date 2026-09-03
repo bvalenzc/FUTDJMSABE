@@ -34,6 +34,9 @@ jobs:
           BASE_PUBLICA: /${{ github.event.repository.name }}/
 
       - uses: actions/configure-pages@v5
+        with:
+          # Enciende Pages solo si el repo todavía no lo tiene activado.
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
