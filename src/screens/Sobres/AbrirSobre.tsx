@@ -12,7 +12,7 @@ type Props = {
 /** Apertura de un sobre comprado: consume una unidad de "Mis sobres". */
 export function AbrirSobre({ sobreId, onVolver }: Props) {
   const sobre = sobrePorId(sobreId)
-  const { consumirSobre } = useJuego()
+  const { guardado, consumirSobre } = useJuego()
   const [aviso, avisoSet] = useState<string | null>(null)
 
   if (!sobre) return null
@@ -27,6 +27,8 @@ export function AbrirSobre({ sobreId, onVolver }: Props) {
           window.setTimeout(() => avisoSet(null), 1800)
           return false
         }}
+        quedanSobres={(guardado.misSobres[sobreId] ?? 0) > 0}
+        onSinMas={onVolver}
       />
       {aviso && <div className="aviso-toast">{aviso}</div>}
     </Pantalla>

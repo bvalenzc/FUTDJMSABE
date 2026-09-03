@@ -1,0 +1,15 @@
+.carta-ampliada {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(120% 90% at 50% 20%, #1c1710 0%, #0a0908 70%);
+  perspective: 900px;
+  cursor: pointer;
+}
+
+.carta-ampliada__escenario {
+  transform-style: preserve-3d;
+}

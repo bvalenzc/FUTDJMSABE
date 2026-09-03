@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { FORMACIONES, SUPLENTES, type SlotFormacion } from '../../config/juego'
 import { conexionesDe } from '../../juego/conexiones'
 import type { DraftGuardado } from '../../juego/estado'
@@ -23,6 +23,20 @@ function posicionEnCancha(slot: SlotFormacion) {
   return { x: 9 + slot.x * 0.82, y: 5 + slot.y * 0.92 }
 }
 
+/** Separación vertical (en % del alto de la cancha) entre el arco y la línea de
+ *  defensa: es el hueco más angosto de la formación, así que manda en cuánto
+ *  puede crecer la carta antes de que dos filas se pisen. */
+const HUECO_VERTICAL = (90 - 68) * 0.92 * 0.01
+const RELACION_CARTA = 486 / 330
+
+/** Tamaño de carta más grande que entra en el alto real de la cancha sin que
+ *  las filas se toquen, con un margen de aire chico entre una fila y otra. */
+function tamanoParaCancha(altoCancha: number): number {
+  if (!altoCancha) return 58
+  const tamano = (altoCancha * HUECO_VERTICAL * 0.94) / RELACION_CARTA
+  return Math.min(96, Math.max(52, Math.round(tamano)))
+}
+
 export function Draft({ onVolver, onIrLiga }: Props) {
   const { guardarDraft, enviarEquipoALiga, agregarMonedas } = useJuego()
 
@@ -39,7 +53,21 @@ export function Draft({ onVolver, onIrLiga }: Props) {
   const [aviso, avisoSet] = useState<string | null>(null)
   const [mostrarPoster, mostrarPosterSet] = useState(false)
   const [bancoAbierto, bancoAbiertoSet] = useState(false)
+  const [tamanoCarta, tamanoCartaSet] = useState(58)
   const cancha = useRef<HTMLDivElement>(null)
+
+  // La cancha ocupa todo el alto que sobra (ver Draft.css) y acá se mide cuánto es
+  // eso en la práctica, para agrandar las cartas hasta ahí sin que se pisen ni haga
+  // falta deslizar: en un celular alto quedan más grandes, en uno bajo se achican solas.
+  useEffect(() => {
+    const el = cancha.current
+    if (!el) return
+    const medir = () => tamanoCartaSet(tamanoParaCancha(el.getBoundingClientRect().height))
+    medir()
+    const observador = new ResizeObserver(medir)
+    observador.observe(el)
+    return () => observador.disconnect()
+  }, [etapa, formacion])
 
   const slots = formacion ? FORMACIONES[formacion] : []
 
@@ -199,7 +227,7 @@ export function Draft({ onVolver, onIrLiga }: Props) {
   }
 
   return (
-    <Pantalla titulo="Draft" onVolver={onVolver}>
+    <Pantalla titulo="Draft" onVolver={onVolver} sinScroll={etapa === 'cancha' || etapa === 'final'}>
       {etapa === 'formacion' && (
         <section className="draft__paso">
           <h2 className="rotulo">Elegí formación</h2>
@@ -287,7 +315,7 @@ export function Draft({ onVolver, onIrLiga }: Props) {
                 >
                   {jugador ? (
                     <>
-                      <Carta jugador={jugador} tamano={58} />
+                      <Carta jugador={jugador} tamano={tamanoCarta} />
                       <span className={`draft__quimica${suma ? ' draft__quimica--ok' : ''}`}>{suma}</span>
                       {id === capitanId && <span className="draft__cinta">C</span>}
                     </>
@@ -320,7 +348,11 @@ export function Draft({ onVolver, onIrLiga }: Props) {
                     className={`draft__banco-slot${elegido ? ' draft__slot--elegido' : ''}`}
                     onClick={() => tocar(puesto)}
                   >
-                    {jugador ? <Carta jugador={jugador} tamano={52} /> : <span className="draft__slot-vacio">+</span>}
+                    {jugador ? (
+                      <Carta jugador={jugador} tamano={Math.round(tamanoCarta * 0.9)} />
+                    ) : (
+                      <span className="draft__slot-vacio">+</span>
+                    )}
                   </button>
                 )
               })}

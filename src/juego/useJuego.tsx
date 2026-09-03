@@ -30,15 +30,37 @@ type Acciones = {
 const Contexto = createContext<Acciones | null>(null)
 
 export function ProveedorJuego({ children }: { children: ReactNode }) {
-  const [guardado, setGuardado] = useState<Guardado>(() => {
+  const [guardado, setGuardadoBase] = useState<Guardado>(() => {
     const inicial = leerGuardado()
     // El roster tiene que conocer las cartas propias antes del primer render.
     sincronizarPropias(inicial.cartasPropias)
     return inicial
   })
 
+  // Guarda en localStorage en el mismo tick del cambio de estado, no en un efecto
+  // aparte un render después. En el celular, salir de la app (o que el sistema la
+  // suspenda) puede matar la pestaña antes de que ese efecto llegue a correr, y con
+  // un sobre recién abierto eso se sentía como "las cartas se borran solas".
+  const setGuardado = useCallback((actualizar: Guardado | ((g: Guardado) => Guardado)) => {
+    setGuardadoBase((g) => {
+      const siguiente = typeof actualizar === 'function' ? (actualizar as (g: Guardado) => Guardado)(g) : actualizar
+      escribirGuardado(siguiente)
+      return siguiente
+    })
+  }, [])
+
+  // Red de seguridad: si por lo que sea una escritura se escapó del wrapper de
+  // arriba, esto la fuerza apenas la pestaña se oculta (minimizar, cambiar de app).
   useEffect(() => {
-    escribirGuardado(guardado)
+    const alOcultar = () => {
+      if (document.visibilityState === 'hidden') escribirGuardado(guardado)
+    }
+    document.addEventListener('visibilitychange', alOcultar)
+    window.addEventListener('pagehide', alOcultar)
+    return () => {
+      document.removeEventListener('visibilitychange', alOcultar)
+      window.removeEventListener('pagehide', alOcultar)
+    }
   }, [guardado])
 
   useEffect(() => {

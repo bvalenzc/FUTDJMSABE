@@ -359,8 +359,15 @@
 .apertura__grilla {
   display: flex;
   flex-wrap: wrap;
-  gap: 9px;
+  gap: 6px;
   justify-content: center;
+}
+
+.apertura__carta-boton {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
 }
 
 @media (prefers-reduced-motion: reduce) {

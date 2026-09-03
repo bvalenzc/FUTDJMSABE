@@ -4,6 +4,7 @@ import { calcularRareza, COLOR_RAREZA } from '../../config/rareza'
 import { abrirSobre } from '../../juego/sorteo'
 import { useJuego } from '../../juego/useJuego'
 import { Carta } from '../../components/Carta/Carta'
+import { CartaAmpliada } from '../../components/CartaAmpliada/CartaAmpliada'
 import { Moneda } from '../../components/Moneda/Moneda'
 import type { Jugador } from '../../types/jugador'
 import './AperturaSobre.css'
@@ -16,6 +17,9 @@ type Props = {
   alAbrir?: () => boolean
   /** Texto del botón cuando el sobre está cerrado. */
   textoBoton?: string
+  /** false cuando no queda stock de este sobre: "OTRO SOBRE" manda a onSinMas en vez de reabrir. */
+  quedanSobres?: boolean
+  onSinMas?: () => void
 }
 
 const GIRO_NORMAL = 900
@@ -24,12 +28,13 @@ const BLANCO = 500
 const MEDIA = 1500
 const POSICION = 800
 
-export function AperturaSobre({ sobre, alAbrir, textoBoton = 'ABRIR SOBRE' }: Props) {
-  const { guardado, agregarCartas, agregarMonedas } = useJuego()
+export function AperturaSobre({ sobre, alAbrir, textoBoton = 'ABRIR SOBRE', quedanSobres, onSinMas }: Props) {
+  const { guardado, agregarCartas, quitarCartas, agregarMonedas } = useJuego()
 
   const [etapa, etapaSet] = useState<Etapa>('cerrado')
   const [cartas, cartasSet] = useState<Jugador[]>([])
   const [repetidas, repetidasSet] = useState<string[]>([])
+  const [cartaAmpliada, cartaAmpliadaSet] = useState<Jugador | null>(null)
   const temporizadores = useRef<number[]>([])
 
   useEffect(() => () => temporizadores.current.forEach(window.clearTimeout), [])
@@ -118,7 +123,9 @@ export function AperturaSobre({ sobre, alAbrir, textoBoton = 'ABRIR SOBRE' }: Pr
 
       {etapa === 'carta' && mejor && (
         <div className="apertura__centro">
-          <Carta jugador={mejor} tamano={236} className="apertura__carta" />
+          <button type="button" className="apertura__carta-boton" onClick={() => cartaAmpliadaSet(mejor)}>
+            <Carta jugador={mejor} tamano={236} className="apertura__carta" />
+          </button>
           {repetidas.includes(mejor.id) && <span className="apertura__repetida">REPETIDA</span>}
           <button type="button" className="boton-oro apertura__boton" onClick={() => etapaSet('todas')}>
             VER LAS {cartas.length} CARTAS
@@ -130,7 +137,14 @@ export function AperturaSobre({ sobre, alAbrir, textoBoton = 'ABRIR SOBRE' }: Pr
         <div className="apertura__resumen">
           <div className="apertura__grilla">
             {cartas.map((j, i) => (
-              <Carta key={j.id + i} jugador={j} tamano={98} />
+              <button
+                key={j.id + i}
+                type="button"
+                className="apertura__carta-boton"
+                onClick={() => cartaAmpliadaSet(j)}
+              >
+                <Carta jugador={j} tamano={122} />
+              </button>
             ))}
           </div>
           {repetidas.length > 0 && (
@@ -138,6 +152,7 @@ export function AperturaSobre({ sobre, alAbrir, textoBoton = 'ABRIR SOBRE' }: Pr
               type="button"
               className="boton-oro apertura__boton"
               onClick={() => {
+                if (!quitarCartas(repetidas)) return
                 agregarMonedas(totalRepetidas)
                 repetidasSet([])
               }}
@@ -146,11 +161,17 @@ export function AperturaSobre({ sobre, alAbrir, textoBoton = 'ABRIR SOBRE' }: Pr
               {totalRepetidas.toLocaleString('es-CL')}
             </button>
           )}
-          <button type="button" className="boton-linea" onClick={reiniciar}>
-            OTRO SOBRE
+          <button
+            type="button"
+            className="boton-linea"
+            onClick={quedanSobres === false ? onSinMas : reiniciar}
+          >
+            {quedanSobres === false ? 'IR A LA TIENDA' : 'OTRO SOBRE'}
           </button>
         </div>
       )}
+
+      {cartaAmpliada && <CartaAmpliada jugador={cartaAmpliada} onCerrar={() => cartaAmpliadaSet(null)} />}
     </div>
   )
 }

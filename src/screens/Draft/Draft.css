@@ -71,8 +71,20 @@
   transform: scale(0.96);
 }
 
+/* Con la cancha ocupando el alto que sobre, el draft agranda solo hasta donde entra
+   sin scroll: en un celular alto queda más grande, en uno bajo se achica solo. */
+.pantalla__cuerpo:has(> .draft__cancha-envoltorio) {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
 .draft__cancha-envoltorio {
-  padding: 8px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+  padding: 6px 12px 10px;
 }
 
 /* ---------- marcador con media y química ---------- */
@@ -81,7 +93,8 @@
   display: flex;
   align-items: flex-end;
   gap: 16px;
-  padding: 4px 2px 10px;
+  flex: none;
+  padding: 2px 2px 6px;
 }
 
 .draft__medida {
@@ -137,7 +150,8 @@
 .draft__cancha {
   position: relative;
   width: 100%;
-  aspect-ratio: 1 / 1.2;
+  flex: 1;
+  min-height: 0;
   margin-top: 8px;
 }
 
@@ -315,8 +329,9 @@
 
 .draft__terminar {
   width: 100%;
-  margin-top: 14px;
-  padding: 14px;
+  flex: none;
+  margin-top: 8px;
+  padding: 13px;
 }
 
 .draft__final p {

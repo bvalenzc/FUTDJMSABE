@@ -37,14 +37,30 @@ function clamp(n: number, min: number, max: number) {
   return Math.min(max, Math.max(min, n))
 }
 
-function probabilidadEvento(propio: number, rivalPoder: number, mediaEquipo: number): number {
-  return clamp(0.32 + (propio - rivalPoder) / 160 + (mediaEquipo - rivalPoder) / 300, 0.14, 0.88)
+/** Curva tipo Elo: a más diferencia, más probabilidad, pero nunca 0 ni 1. */
+function sigmoide(diferencia: number, sensibilidad: number): number {
+  return 1 / (1 + Math.pow(10, -diferencia / sensibilidad))
+}
+
+/**
+ * La media del plantel pesa más que el stat puntual del jugador de turno: un draft con
+ * mejor media tiene que sentirse con más chances de ganar de punta a punta, no solo
+ * cuando le toca ejecutar a su mejor carta.
+ */
+function probabilidadEvento(statJugador: number, rivalPoder: number, mediaEquipo: number): number {
+  const diferencia = (mediaEquipo - rivalPoder) * 1.1 + (statJugador - rivalPoder) * 0.4
+  return clamp(sigmoide(diferencia, 40), 0.1, 0.92)
+}
+
+/** Con qué frecuencia la chance es de DJM y no del rival: sube fuerte con la diferencia de media. */
+function probabilidadChanceDjm(mediaDjm: number, rivalPoder: number): number {
+  return clamp(sigmoide((mediaDjm - rivalPoder) * 1.3, 40), 0.12, 0.88)
 }
 
 /** 8 a 12 eventos por partido: la mayoría chances de gol, más alguna tarjeta o lesión. */
 function generarEventos(mediaDjm: number, rivalPoder: number): Evento[] {
   const total = 8 + Math.floor(Math.random() * 5)
-  const probDjm = mediaDjm / (mediaDjm + rivalPoder)
+  const probDjm = probabilidadChanceDjm(mediaDjm, rivalPoder)
   const minutos = Array.from({ length: total }, () => 1 + Math.floor(Math.random() * 89)).sort((a, b) => a - b)
   return minutos.map((minuto) => {
     const r = Math.random()
