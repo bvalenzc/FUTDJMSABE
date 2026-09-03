@@ -63,6 +63,8 @@ export type Rareza =
   | 'djdor'
   | 'flashback'
   | 'parche'
+  | 'parche-oro'
+  | 'fairplay'
 
 export const RAREZAS: { id: Rareza; nombre: string }[] = [
   { id: 'plata', nombre: 'Plata' },
@@ -73,4 +75,6 @@ export const RAREZAS: { id: Rareza; nombre: string }[] = [
   { id: 'djdor', nombre: "Don Julio D'Or" },
   { id: 'flashback', nombre: 'Flashback' },
   { id: 'parche', nombre: 'Parche' },
+  { id: 'parche-oro', nombre: 'Parche de Oro' },
+  { id: 'fairplay', nombre: 'Fairplay' },
 ]

@@ -594,6 +594,70 @@
   --sub-color: #9c2e1e;
 }
 
+.carta[data-rareza='parche-oro'] {
+  --c1: #f27c63;
+  --c2: #da4a30;
+  --c3: #ac2416;
+  --c4: #7c160b;
+  --c5: #440b05;
+  --engrave: #fce29b;
+  --engrave-op: 0.3;
+  --engrave-blend: screen;
+  --turn: rgba(252, 226, 155, 0.05);
+  --foil: 0.5;
+  --fig-body: #440b05;
+  --fig-rim: #fce29b;
+  --fig-rim-op: 0.32;
+  --scrim-0: rgba(68, 11, 5, 0);
+  --scrim-1: rgba(68, 11, 5, 0.4);
+  --scrim-2: rgba(50, 8, 4, 0.76);
+  --scrim-3: rgba(32, 5, 3, 0.93);
+  --scrimtop: rgba(246, 220, 201, 0.5);
+  --orn-dark: #e8b44a;
+  --orn-light: #ffe9b0;
+  --ink: #340905;
+  --ink-soft: #7a3113;
+  --ink-glow: rgba(255, 236, 205, 0.6);
+  --name-main: #ffe9b0;
+  --name-sub: rgba(255, 233, 176, 0.88);
+  --rule: rgba(232, 180, 74, 0.9);
+  --divider: rgba(232, 180, 74, 0.55);
+  --footer: rgba(232, 180, 74, 0.8);
+  --pos-color: #5c3a08;
+  --sub-color: #5c3a08;
+}
+
+.carta[data-rareza='fairplay'] {
+  --c1: #cbaaf2;
+  --c2: #9862d8;
+  --c3: #65309f;
+  --c4: #37155f;
+  --c5: #150730;
+  --engrave: #0a0612;
+  --engrave-op: 0.3;
+  --engrave-blend: multiply;
+  --turn: rgba(10, 6, 18, 0.09);
+  --foil: 0.5;
+  --fig-body: #150730;
+  --fig-rim: #0a0612;
+  --fig-rim-op: 0.45;
+  --scrim-0: rgba(21, 7, 48, 0);
+  --scrim-1: rgba(21, 7, 48, 0.38);
+  --scrim-2: rgba(14, 5, 32, 0.76);
+  --scrim-3: rgba(7, 2, 16, 0.94);
+  --scrimtop: rgba(203, 170, 242, 0.42);
+  --orn-dark: #0a0612;
+  --orn-light: #e7d8fa;
+  --ink: #0a0612;
+  --ink-soft: #4b2a80;
+  --ink-glow: rgba(231, 216, 250, 0.7);
+  --name-main: #f3ecff;
+  --name-sub: rgba(231, 216, 250, 0.85);
+  --rule: rgba(231, 216, 250, 0.75);
+  --divider: rgba(231, 216, 250, 0.45);
+  --footer: rgba(231, 216, 250, 0.62);
+}
+
 /* --- capa extra: DON JULIO D'OR --- */
 
 .carta__djd-oro {
@@ -744,6 +808,45 @@
 
 .carta[data-rareza='parche'] .carta__rating {
   text-shadow: 0 1px 0 var(--ink-glow), 2px 2px 0 rgba(178, 58, 40, 0.28), 0 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* --- capa extra: PARCHE DE ORO (costura dorada sobre rojo) --- */
+
+.carta__pchoro-dorado {
+  stroke: #e8b44a;
+}
+
+.carta__pchoro-dorado-f {
+  fill: #e8b44a;
+  stroke: none;
+}
+
+.carta[data-rareza='parche-oro'] .carta__club-marca {
+  text-shadow: 0 1px 0 var(--ink-glow), 0 0 12px rgba(232, 180, 74, 0.4);
+}
+
+.carta[data-rareza='parche-oro'] .carta__rating {
+  text-shadow: 0 1px 0 var(--ink-glow), 2px 2px 0 rgba(232, 180, 74, 0.32), 0 3px 8px rgba(0, 0, 0, 0.35);
+}
+
+/* --- capa extra: FAIRPLAY (barras 3D biseladas) --- */
+
+.carta__fp-negro {
+  stroke: #0a0612;
+}
+
+.carta__fp-negro-f {
+  fill: #0a0612;
+  stroke: none;
+}
+
+.carta__fp-lavanda {
+  stroke: #e7d8fa;
+}
+
+.carta__fp-lavanda-f {
+  fill: #e7d8fa;
+  stroke: none;
 }
 
 /* ================= interacción (tilt 3D, solo detalle) ================= */

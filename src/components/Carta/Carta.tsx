@@ -11,6 +11,8 @@ import { OrnamentoSvg } from './OrnamentoSvg'
 import { CapaParche } from './CapaParche'
 import { CapaDjdor } from './CapaDjdor'
 import { CapaFlashback } from './CapaFlashback'
+import { CapaParcheOro } from './CapaParcheOro'
+import { CapaFairplay } from './CapaFairplay'
 import './Carta.css'
 
 const ANCHO_BASE = 330
@@ -76,6 +78,8 @@ export function Carta({ jugador, tamano = ANCHO_BASE, interactivo = false, class
         <div className="carta__foil" />
         {rareza === 'parche' && <CapaParche />}
         {rareza === 'djdor' && <CapaDjdor />}
+        {rareza === 'parche-oro' && <CapaParcheOro />}
+        {rareza === 'fairplay' && <CapaFairplay />}
 
         {alternativas.length > 0 && (
           <div className="carta__alternativas">

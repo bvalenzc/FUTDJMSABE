@@ -103,5 +103,29 @@
       "col": 81
     },
     "foto": "tito"
+  },
+  {
+    "id": "mvalenz-parche-oro",
+    "nombre": "MVALENZ",
+    "persona": "MVALENZ",
+    "posicion": "DC",
+    "posiciones": [
+      "DC",
+      "MI",
+      "MC"
+    ],
+    "tipo": "parche",
+    "tipoStats": "campo",
+    "media": 83,
+    "rareza": "parche-oro",
+    "stats": {
+      "rit": 84,
+      "tir": 90,
+      "pas": 86,
+      "reg": 87,
+      "def": 77,
+      "fis": 76
+    },
+    "foto": "maxv"
   }
 ]

@@ -299,5 +299,50 @@
       "abajo": 10,
       "x": 4
     }
+  },
+  {
+    "id": "pancho-fairplay",
+    "nombre": "PANCHO",
+    "persona": "PANCHO",
+    "posicion": "DFC",
+    "posiciones": [
+      "DFC",
+      "LD"
+    ],
+    "tipo": "plantel",
+    "tipoStats": "campo",
+    "media": 79,
+    "rareza": "fairplay",
+    "stats": {
+      "rit": 80,
+      "tir": 67,
+      "pas": 74,
+      "reg": 70,
+      "def": 89,
+      "fis": 92
+    },
+    "foto": "pancho"
+  },
+  {
+    "id": "pelao-mvp",
+    "nombre": "PELAO",
+    "persona": "PELAO",
+    "posicion": "ARQ",
+    "posiciones": [
+      "ARQ"
+    ],
+    "tipo": "plantel",
+    "tipoStats": "arquero",
+    "media": 84,
+    "rareza": "mvp",
+    "stats": {
+      "est": 84,
+      "par": 85,
+      "saq": 74,
+      "ref": 87,
+      "vel": 81,
+      "col": 91
+    },
+    "foto": "pelaoizq"
   }
 ]
