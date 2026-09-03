@@ -1,5 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { escribirGuardado, GUARDADO_INICIAL, leerGuardado, type DraftGuardado, type Guardado } from './estado'
+import { ligaInicial, type LigaGuardado } from './liga'
+import { GRUPO_DJM } from '../config/liga'
 import { sincronizarPropias } from './roster'
 import type { Jugador } from '../types/jugador'
 
@@ -18,6 +20,9 @@ type Acciones = {
   marcarPlantilla: (plantillaId: string) => void
   marcarSbcReclamado: (sbcId: string) => void
   registrarPackGratis: () => void
+  /** Manda el equipo recién armado en el draft a la liga, listo para jugar la próxima fecha. */
+  enviarEquipoALiga: (draft: DraftGuardado) => void
+  guardarResultadoLiga: (liga: LigaGuardado) => void
   reiniciar: () => void
 }
 
@@ -123,6 +128,17 @@ export function ProveedorJuego({ children }: { children: ReactNode }) {
     setGuardado((g) => ({ ...g, ultimoPackGratis: Date.now() }))
   }, [])
 
+  const enviarEquipoALiga = useCallback((draft: DraftGuardado) => {
+    setGuardado((g) => ({
+      ...g,
+      liga: { ...(g.liga ?? ligaInicial(GRUPO_DJM)), equipoPendiente: draft },
+    }))
+  }, [])
+
+  const guardarResultadoLiga = useCallback((liga: LigaGuardado) => {
+    setGuardado((g) => ({ ...g, liga }))
+  }, [])
+
   const crearCarta = useCallback((carta: Jugador) => {
     let ok = false
     setGuardado((g) => {
@@ -142,7 +158,7 @@ export function ProveedorJuego({ children }: { children: ReactNode }) {
   }, [])
 
   const reiniciar = useCallback(() => {
-    setGuardado({ ...GUARDADO_INICIAL, coleccion: {}, misSobres: { gratis: 1 }, drafts: [] })
+    setGuardado({ ...GUARDADO_INICIAL, coleccion: {}, misSobres: { gratis: 1 }, drafts: [], liga: null })
   }, [])
 
   const valor = useMemo<Acciones>(
@@ -161,6 +177,8 @@ export function ProveedorJuego({ children }: { children: ReactNode }) {
       marcarPlantilla,
       marcarSbcReclamado,
       registrarPackGratis,
+      enviarEquipoALiga,
+      guardarResultadoLiga,
       reiniciar,
     }),
     [
@@ -178,6 +196,8 @@ export function ProveedorJuego({ children }: { children: ReactNode }) {
       marcarPlantilla,
       marcarSbcReclamado,
       registrarPackGratis,
+      enviarEquipoALiga,
+      guardarResultadoLiga,
       reiniciar,
     ],
   )

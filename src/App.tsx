@@ -12,6 +12,8 @@ import { Mercado } from './screens/Mercado/Mercado'
 import { MiEquipo } from './screens/MiEquipo/MiEquipo'
 import { Draft } from './screens/Draft/Draft'
 import { Sbc } from './screens/Sbc/Sbc'
+import { Liga } from './screens/Liga/Liga'
+import { Partido } from './screens/Partido/Partido'
 import './App.css'
 
 function Juego() {
@@ -37,9 +39,13 @@ function Juego() {
     case 'miequipo':
       return <MiEquipo onVolver={volver} onAbrirCarta={(id) => ir({ tipo: 'detalle', id })} />
     case 'draft':
-      return <Draft onVolver={volver} />
+      return <Draft onVolver={volver} onIrLiga={() => ir({ tipo: 'liga' })} />
     case 'sbc':
       return <Sbc onVolver={volver} />
+    case 'liga':
+      return <Liga onVolver={volver} onJugarFecha={() => ir({ tipo: 'partido' })} />
+    case 'partido':
+      return <Partido onVolver={volver} onFin={() => ir({ tipo: 'inicio' })} />
     default:
       return <Inicio jugadores={obtenerRoster()} onIr={(destino) => ir({ tipo: destino } as never)} />
   }

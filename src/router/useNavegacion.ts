@@ -13,6 +13,8 @@ export type Pantalla =
   | { tipo: 'packs' }
   | { tipo: 'admin' }
   | { tipo: 'drafts' }
+  | { tipo: 'liga' }
+  | { tipo: 'partido' }
 
 const INICIO: Pantalla = { tipo: 'inicio' }
 

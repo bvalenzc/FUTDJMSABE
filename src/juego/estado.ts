@@ -9,6 +9,7 @@ export type DraftGuardado = {
 }
 
 import type { Jugador } from '../types/jugador'
+import type { LigaGuardado } from './liga'
 
 export type Guardado = {
   monedas: number
@@ -24,6 +25,8 @@ export type Guardado = {
   /** id de SBC -> recompensa final reclamada */
   sbcReclamados: Record<string, boolean>
   ultimoPackGratis: number | null
+  /** liga del equipo: tabla, fecha actual y resultados. null hasta el primer "Ir a liga". */
+  liga: LigaGuardado | null
 }
 
 export const GUARDADO_INICIAL: Guardado = {
@@ -35,6 +38,7 @@ export const GUARDADO_INICIAL: Guardado = {
   plantillasHechas: {},
   sbcReclamados: {},
   ultimoPackGratis: null,
+  liga: null,
 }
 
 const CLAVE = 'djm_cartas_guardado_v1'

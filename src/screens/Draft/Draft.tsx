@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { FORMACIONES, SUPLENTES, type SlotFormacion } from '../../config/juego'
 import { conexionesDe } from '../../juego/conexiones'
+import type { DraftGuardado } from '../../juego/estado'
 import { candidatosCapitan, formacionesAlAzar, opcionesParaBanco, opcionesParaSlot } from '../../juego/sorteo'
 import { jugadorPorId, personaDe, posicionesDe } from '../../juego/roster'
 import { quimicaDeSlot, quimicaMaxima, quimicaTotal } from '../../juego/quimica'
@@ -11,7 +12,7 @@ import { PosterDraft } from './PosterDraft'
 import type { Jugador } from '../../types/jugador'
 import './Draft.css'
 
-type Props = { onVolver: () => void }
+type Props = { onVolver: () => void; onIrLiga: () => void }
 type Etapa = 'formacion' | 'capitan' | 'cancha' | 'final'
 type Puesto = { tipo: 'slot' | 'banco'; indice: number }
 
@@ -22,11 +23,11 @@ function posicionEnCancha(slot: SlotFormacion) {
   return { x: 9 + slot.x * 0.82, y: 5 + slot.y * 0.92 }
 }
 
-export function Draft({ onVolver }: Props) {
-  const { guardarDraft, agregarMonedas } = useJuego()
+export function Draft({ onVolver, onIrLiga }: Props) {
+  const { guardarDraft, enviarEquipoALiga, agregarMonedas } = useJuego()
 
   const [etapa, etapaSet] = useState<Etapa>('formacion')
-  const [opcionesFormacion] = useState<string[]>(() => formacionesAlAzar())
+  const [opcionesFormacion, opcionesFormacionSet] = useState<string[]>(() => formacionesAlAzar())
   const [formacion, formacionSet] = useState<string | null>(null)
   const [capitanId, capitanIdSet] = useState<string | null>(null)
   const [capitanes, capitanesSet] = useState<Jugador[]>([])
@@ -36,7 +37,6 @@ export function Draft({ onVolver }: Props) {
   const [opciones, opcionesSet] = useState<Jugador[]>([])
   const [seleccion, seleccionSet] = useState<Puesto | null>(null)
   const [aviso, avisoSet] = useState<string | null>(null)
-  const [guardadoOk, guardadoOkSet] = useState(false)
   const [mostrarPoster, mostrarPosterSet] = useState(false)
   const [bancoAbierto, bancoAbiertoSet] = useState(false)
   const cancha = useRef<HTMLDivElement>(null)
@@ -163,6 +163,39 @@ export function Draft({ onVolver }: Props) {
   const terminar = () => {
     etapaSet('final')
     if (premio > 0) agregarMonedas(premio)
+  }
+
+  const equipoActual = (): DraftGuardado => ({
+    id: `${Date.now()}`,
+    fecha: Date.now(),
+    formacion: formacion!,
+    capitanId,
+    titulares,
+    suplentes,
+    media,
+  })
+
+  const irALiga = () => {
+    const equipo = equipoActual()
+    guardarDraft(equipo)
+    enviarEquipoALiga(equipo)
+    onIrLiga()
+  }
+
+  const reiniciarDraft = () => {
+    etapaSet('formacion')
+    opcionesFormacionSet(formacionesAlAzar())
+    formacionSet(null)
+    capitanIdSet(null)
+    capitanesSet([])
+    titularesSet([])
+    suplentesSet(Array(SUPLENTES).fill(null))
+    eligiendoSet(null)
+    opcionesSet([])
+    seleccionSet(null)
+    avisoSet(null)
+    mostrarPosterSet(false)
+    bancoAbiertoSet(false)
   }
 
   return (
@@ -313,28 +346,17 @@ export function Draft({ onVolver }: Props) {
               </p>
               <p className="draft__pista">Podés seguir moviendo jugadores entre posiciones.</p>
               <div className="draft__acciones">
-                <button type="button" className="boton-oro" onClick={() => mostrarPosterSet(true)}>
-                  GUARDAR IMAGEN
+                <button type="button" className="boton-oro" onClick={irALiga}>
+                  IR A LIGA
                 </button>
-                <button
-                  type="button"
-                  className="boton-linea"
-                  disabled={guardadoOk}
-                  onClick={() => {
-                    guardarDraft({
-                      id: `${Date.now()}`,
-                      fecha: Date.now(),
-                      formacion,
-                      capitanId,
-                      titulares,
-                      suplentes,
-                      media,
-                    })
-                    guardadoOkSet(true)
-                  }}
-                >
-                  {guardadoOk ? 'EQUIPO GUARDADO' : 'GUARDAR EQUIPO'}
-                </button>
+                <div className="draft__acciones-secundarias">
+                  <button type="button" className="boton-linea" onClick={() => mostrarPosterSet(true)}>
+                    DESCARGAR IMAGEN
+                  </button>
+                  <button type="button" className="boton-linea" onClick={reiniciarDraft}>
+                    REINICIAR DRAFT
+                  </button>
+                </div>
               </div>
             </div>
           )}

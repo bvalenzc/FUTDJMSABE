@@ -1,0 +1,175 @@
+.liga__vacio {
+  margin-top: 40px;
+  text-align: center;
+  color: var(--texto-medio);
+  font-size: 13px;
+}
+
+.liga__switch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.liga__flecha {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--borde);
+  border-radius: 50%;
+  background: var(--superficie);
+  color: var(--oro-claro);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.liga__grupo-nombre {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 190px;
+  text-align: center;
+  font-family: 'Anton', sans-serif;
+  font-size: 15px;
+  letter-spacing: 1.5px;
+  color: var(--texto);
+}
+
+.liga__grupo-nombre em {
+  font-family: 'Inter', sans-serif;
+  font-style: normal;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--oro-claro);
+}
+
+.liga__tabla {
+  overflow: hidden;
+}
+
+.liga__fila {
+  display: grid;
+  grid-template-columns: 30px 1fr 24px 24px 24px 24px 28px 32px;
+  align-items: center;
+  gap: 4px;
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--borde);
+  font-size: 11.5px;
+  color: var(--texto-medio);
+}
+
+.liga__fila:last-child {
+  border-bottom: none;
+}
+
+.liga__fila--cabecera {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--texto-tenue);
+  text-align: center;
+}
+
+.liga__fila--cabecera .liga__equipo {
+  text-align: left;
+}
+
+.liga__fila > span {
+  text-align: center;
+}
+
+.liga__fila--djm {
+  background: linear-gradient(90deg, rgba(232, 197, 101, 0.14), transparent 70%);
+  color: var(--texto);
+  font-weight: 700;
+}
+
+.liga__pos {
+  position: relative;
+  font-weight: 700;
+  color: var(--texto);
+}
+
+.liga__pastilla-copa {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6);
+}
+
+.liga__equipo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left !important;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 12px;
+}
+
+.liga__pts {
+  font-weight: 800;
+  color: var(--oro-claro);
+}
+
+.liga__leyenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin: 10px 2px 0;
+}
+
+.liga__leyenda-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9.5px;
+  letter-spacing: 0.4px;
+  color: var(--texto-tenue);
+}
+
+.liga__leyenda-item i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.liga__accion {
+  margin-top: 18px;
+}
+
+.liga__boton-fecha {
+  width: 100%;
+}
+
+.liga__pista {
+  text-align: center;
+  font-size: 12px;
+  color: var(--texto-medio);
+}
+
+.liga__final {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px;
+  border: 1px solid;
+  border-radius: var(--r-medio);
+  background: var(--superficie);
+  text-align: center;
+}
+
+.liga__final strong {
+  font-family: 'Anton', sans-serif;
+  font-size: 17px;
+  letter-spacing: 0.6px;
+}
