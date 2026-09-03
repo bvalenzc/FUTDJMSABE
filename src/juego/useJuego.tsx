@@ -91,6 +91,9 @@ export function ProveedorJuego({ children }: { children: ReactNode }) {
     })
   }, [])
 
+  // Una carta que ya tocó nunca se borra del todo acá: solo se pueden gastar copias
+  // de más, siempre queda al menos 1. Es la única puerta por la que se sacan cartas
+  // de la colección (mercado, vender repetida, SBC), así que el piso vale para todas.
   const quitarCartas = useCallback((ids: string[]) => {
     let ok = false
     setGuardado((g) => {
@@ -98,12 +101,11 @@ export function ProveedorJuego({ children }: { children: ReactNode }) {
       const falta = ids.some((id) => {
         const disponibles = coleccion[id] ?? 0
         const pedidas = ids.filter((x) => x === id).length
-        return disponibles < pedidas
+        return disponibles - pedidas < 1
       })
       if (falta) return g
       ids.forEach((id) => {
         coleccion[id] = (coleccion[id] ?? 0) - 1
-        if (coleccion[id] <= 0) delete coleccion[id]
       })
       ok = true
       return { ...g, coleccion }

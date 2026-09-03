@@ -26,7 +26,8 @@ export function Mercado({ onVolver }: Props) {
       .filter(([id]) => !usadosEnOtros.includes(id))
       .map(([id, cantidad]) => ({ jugador: jugadorPorId(id), cantidad }))
       .filter((x) => x.jugador && x.jugador.media >= MEDIA_MINIMA_MERCADO)
-      .filter((x) => x.cantidad >= tamanoBloqueMercado(x.jugador!.media))
+      // Vender un bloque nunca puede dejar la colección en 0: hace falta una copia extra.
+      .filter((x) => x.cantidad > tamanoBloqueMercado(x.jugador!.media))
       .map((x) => x.jugador!)
       .sort((a, b) => b.media - a.media)
   }
@@ -112,7 +113,8 @@ export function Mercado({ onVolver }: Props) {
               ))}
               {elegibles(eligiendo).length === 0 && (
                 <p className="mercado__picker-vacio">
-                  No tenés repetidas suficientes. Hacen falta 3 copias (84+) o 6 copias (80-83).
+                  No tenés repetidas suficientes. Hacen falta 4 copias (84+) o 7 copias (80-83): el
+                  bloque se vende de a 3 o 6, siempre te queda 1.
                 </p>
               )}
             </div>

@@ -37,7 +37,8 @@ export function Sbc({ onVolver }: Props) {
     return Object.entries(guardado.coleccion)
       .map(([id, cantidad]) => ({ jugador: jugadorPorId(id), cantidad }))
       .filter((x) => x.jugador && cumple(x.jugador, requisito))
-      .filter((x) => x.cantidad > usadosEnOtros.filter((u) => u === x.jugador!.id).length)
+      // Una SBC solo gasta copias de más: la última de cada carta no se ofrece.
+      .filter((x) => x.cantidad > usadosEnOtros.filter((u) => u === x.jugador!.id).length + 1)
       .map((x) => x.jugador!)
       .sort((a, b) => b.media - a.media)
   }
@@ -64,7 +65,10 @@ export function Sbc({ onVolver }: Props) {
     return (
       <Pantalla titulo={plantillaActiva.nombre} onVolver={() => plantillaActivaSet(null)}>
 
-        <p className="sbc__intro">Asigná una carta tuya a cada requisito. Al confirmar se consumen.</p>
+        <p className="sbc__intro">
+          Asigná una repetida a cada requisito. Al confirmar se consumen; la única copia de una
+          carta nunca se ofrece acá.
+        </p>
 
         <div className="sbc__requisitos">
           {plantillaActiva.requisitos.map((req, i) => {
