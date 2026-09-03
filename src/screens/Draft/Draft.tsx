@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
-import { FORMACIONES, SUPLENTES } from '../../config/juego'
+import { FORMACIONES, SUPLENTES, type SlotFormacion } from '../../config/juego'
+import { conexionesDe } from '../../juego/conexiones'
 import { candidatosCapitan, formacionesAlAzar, opcionesParaBanco, opcionesParaSlot } from '../../juego/sorteo'
 import { jugadorPorId, personaDe, posicionesDe } from '../../juego/roster'
 import { quimicaDeSlot, quimicaMaxima, quimicaTotal } from '../../juego/quimica'
@@ -15,6 +16,11 @@ type Etapa = 'formacion' | 'capitan' | 'cancha' | 'final'
 type Puesto = { tipo: 'slot' | 'banco'; indice: number }
 
 const MENSAJE_HUECO = 'NO SEAI LARRY, NO LO PODI CAMBIAR AHÍ'
+
+/** Lleva las coordenadas de la formación al área útil de la cancha dibujada. */
+function posicionEnCancha(slot: SlotFormacion) {
+  return { x: 9 + slot.x * 0.82, y: 5 + slot.y * 0.92 }
+}
 
 export function Draft({ onVolver }: Props) {
   const { guardarDraft, agregarMonedas } = useJuego()
@@ -32,6 +38,7 @@ export function Draft({ onVolver }: Props) {
   const [aviso, avisoSet] = useState<string | null>(null)
   const [guardadoOk, guardadoOkSet] = useState(false)
   const [mostrarPoster, mostrarPosterSet] = useState(false)
+  const [bancoAbierto, bancoAbiertoSet] = useState(false)
   const cancha = useRef<HTMLDivElement>(null)
 
   const slots = formacion ? FORMACIONES[formacion] : []
@@ -57,6 +64,11 @@ export function Draft({ onVolver }: Props) {
 
   const quimica = useMemo(() => quimicaTotal(titulares, slots), [titulares, slots])
   const quimicaTope = quimicaMaxima(slots)
+  const conexiones = useMemo(() => conexionesDe(slots), [slots])
+  const enPosicion = useMemo(
+    () => slots.map((slot, i) => quimicaDeSlot(titulares[i] ?? null, slot.role) > 0),
+    [slots, titulares],
+  )
 
   const mostrarAviso = (texto: string) => {
     avisoSet(texto)
@@ -203,6 +215,26 @@ export function Draft({ onVolver }: Props) {
           </div>
 
           <div className="draft__cancha" ref={cancha}>
+            {/* El césped es la única capa inclinada; las cartas quedan de frente. */}
+            <div className="draft__cesped" aria-hidden="true" />
+
+            {/* Red de conexiones: verde cuando las dos puntas están en posición. */}
+            <svg className="draft__lineas" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              {conexiones.map(({ a, b }) => {
+                const ok = enPosicion[a] && enPosicion[b]
+                return (
+                  <line
+                    key={`${a}-${b}`}
+                    x1={posicionEnCancha(slots[a]).x}
+                    y1={posicionEnCancha(slots[a]).y}
+                    x2={posicionEnCancha(slots[b]).x}
+                    y2={posicionEnCancha(slots[b]).y}
+                    className={ok ? 'draft__linea draft__linea--ok' : 'draft__linea'}
+                  />
+                )
+              })}
+            </svg>
+
             {slots.map((slot, i) => {
               const id = titulares[i]
               const jugador = id ? jugadorPorId(id) : null
@@ -214,12 +246,15 @@ export function Draft({ onVolver }: Props) {
                   key={i}
                   type="button"
                   className={`draft__slot${elegido ? ' draft__slot--elegido' : ''}`}
-                  style={{ left: `${12 + slot.x * 0.76}%`, top: `${9 + slot.y * 0.82}%` }}
+                  style={{
+                    left: `${posicionEnCancha(slot).x}%`,
+                    top: `${posicionEnCancha(slot).y}%`,
+                  }}
                   onClick={() => tocar(puesto)}
                 >
                   {jugador ? (
                     <>
-                      <Carta jugador={jugador} tamano={62} />
+                      <Carta jugador={jugador} tamano={58} />
                       <span className={`draft__quimica${suma ? ' draft__quimica--ok' : ''}`}>{suma}</span>
                       {id === capitanId && <span className="draft__cinta">C</span>}
                     </>
@@ -229,25 +264,34 @@ export function Draft({ onVolver }: Props) {
                 </button>
               )
             })}
-          </div>
 
-          <h3 className="rotulo draft__titulo-banco">Banco</h3>
-          <div className="draft__banco">
-            {suplentes.map((id, i) => {
-              const jugador = id ? jugadorPorId(id) : null
-              const puesto: Puesto = { tipo: 'banco', indice: i }
-              const elegido = seleccion?.tipo === 'banco' && seleccion.indice === i
-              return (
-                <button
-                  key={i}
-                  type="button"
-                  className={`draft__banco-slot${elegido ? ' draft__slot--elegido' : ''}`}
-                  onClick={() => tocar(puesto)}
-                >
-                  {jugador ? <Carta jugador={jugador} tamano={62} /> : <span className="draft__slot-vacio">+</span>}
-                </button>
-              )
-            })}
+            {/* Banco escondido: la lengüeta lo despliega desde abajo. */}
+            <button
+              type="button"
+              className={`draft__lengueta${bancoAbierto ? ' draft__lengueta--abierta' : ''}`}
+              onClick={() => bancoAbiertoSet(!bancoAbierto)}
+              aria-expanded={bancoAbierto}
+            >
+              SUBS
+            </button>
+
+            <div className={`draft__banco${bancoAbierto ? ' draft__banco--abierto' : ''}`}>
+              {suplentes.map((id, i) => {
+                const jugador = id ? jugadorPorId(id) : null
+                const puesto: Puesto = { tipo: 'banco', indice: i }
+                const elegido = seleccion?.tipo === 'banco' && seleccion.indice === i
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    className={`draft__banco-slot${elegido ? ' draft__slot--elegido' : ''}`}
+                    onClick={() => tocar(puesto)}
+                  >
+                    {jugador ? <Carta jugador={jugador} tamano={52} /> : <span className="draft__slot-vacio">+</span>}
+                  </button>
+                )
+              })}
+            </div>
           </div>
 
           {seleccion && <p className="draft__pista">Tocá otra carta para intercambiarlas.</p>}
