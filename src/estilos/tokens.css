@@ -1,0 +1,192 @@
+/*
+ * Sistema visual FUTDJM. Continúa el lenguaje del proyecto anterior:
+ * oro sobre tinta, tipografía Anton + Inter + Playfair, y una columna
+ * de 430px que hace que en cualquier pantalla se vea como una app de celular.
+ */
+
+:root {
+  /* marca */
+  --oro: #b5922e;
+  --oro-claro: #e8c565;
+  --oro-hondo: #6e5717;
+  --rojo: #93202b;
+  --rojo-claro: #cf7982;
+  --tinta: #0a0908;
+
+  /* superficies */
+  --superficie: #171209;
+  --superficie-2: #1e1710;
+  --borde: rgba(232, 197, 101, 0.22);
+  --borde-fuerte: rgba(232, 197, 101, 0.4);
+
+  /* texto */
+  --texto: #f3ede0;
+  --texto-medio: #a89a76;
+  --texto-tenue: #5c5340;
+
+  /* medidas */
+  --ancho-app: 430px;
+  --r-chico: 8px;
+  --r-medio: 12px;
+  --r-grande: 16px;
+  --barra-alto: 46px;
+
+  --sombra: 0 10px 26px rgba(0, 0, 0, 0.55);
+  --sombra-hundida: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+  color-scheme: dark;
+}
+
+/* Fondo ambiente: se ve por fuera de la columna en pantallas anchas. */
+.fondo-ambiente {
+  background:
+    radial-gradient(ellipse 90% 40% at 50% 0%, rgba(232, 197, 101, 0.12), transparent 60%),
+    repeating-linear-gradient(115deg, rgba(232, 197, 101, 0.02) 0 1px, transparent 1px 46px),
+    linear-gradient(175deg, #141109, #0a0908 60%);
+}
+
+/* ---------- tipografía ---------- */
+
+.display {
+  font-family: 'Anton', 'Barlow Condensed', sans-serif;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--oro-claro);
+  opacity: 0.85;
+}
+
+.rotulo {
+  margin: 0;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--texto-medio);
+}
+
+.regla-oro {
+  width: 50px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--oro), transparent);
+}
+
+/* ---------- botones ---------- */
+
+.boton-oro {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 12px 18px;
+  border: none;
+  border-radius: var(--r-chico);
+  background: linear-gradient(180deg, var(--oro-claro), var(--oro));
+  color: #1c1600;
+  font-family: 'Anton', sans-serif;
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.16s ease, filter 0.16s ease;
+}
+
+.boton-oro:active {
+  transform: scale(0.985);
+  filter: brightness(1.06);
+}
+
+.boton-oro:disabled {
+  background: var(--superficie);
+  box-shadow: inset 0 0 0 1px var(--borde);
+  color: var(--texto-tenue);
+  cursor: default;
+  transform: none;
+}
+
+.boton-linea {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border: 1px solid var(--borde);
+  border-radius: var(--r-chico);
+  background: var(--superficie);
+  color: var(--texto-medio);
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.16s ease, color 0.16s ease;
+}
+
+.boton-linea:active {
+  border-color: var(--borde-fuerte);
+  color: var(--texto);
+}
+
+/* Pastilla de filtro, igual que en el proyecto anterior. */
+.pastilla {
+  padding: 6px 12px;
+  border: 1px solid var(--borde);
+  border-radius: 20px;
+  background: var(--superficie);
+  color: var(--texto-medio);
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pastilla.activa {
+  background: linear-gradient(180deg, var(--oro-claro), var(--oro));
+  border-color: transparent;
+  color: #1c1600;
+  font-weight: 700;
+}
+
+/* Pestañas. */
+.pestana {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid var(--borde);
+  border-radius: 9px;
+  background: var(--superficie);
+  color: var(--texto-medio);
+  font-family: 'Anton', sans-serif;
+  font-size: 12px;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+
+.pestana.activa {
+  background: linear-gradient(180deg, var(--oro-claro), var(--oro));
+  border-color: transparent;
+  color: #1c1600;
+}
+
+/* Tarjeta de superficie (filas de tienda, SBC, admin). */
+.tarjeta {
+  border: 1px solid var(--borde);
+  border-radius: var(--r-medio);
+  background: var(--superficie);
+}
+
+:where(button, a, input, select):focus-visible {
+  outline: 2px solid var(--oro-claro);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boton-oro,
+  .boton-linea {
+    transition: none;
+  }
+}

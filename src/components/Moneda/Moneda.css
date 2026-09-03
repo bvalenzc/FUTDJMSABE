@@ -1,0 +1,39 @@
+.moneda {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 26%, #fff3c4 0%, #f0cd6f 34%, #c9a13c 62%, #8a6014 88%, #5c3f0d 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 245, 205, 0.8),
+    inset 0 -1px 2px rgba(92, 63, 13, 0.6),
+    0 1px 2px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+/* Borde estriado, como el canto de una moneda. */
+.moneda::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(92, 63, 13, 0.45) 0deg 2deg,
+    transparent 2deg 6deg
+  );
+  mask-image: radial-gradient(circle, transparent 74%, #000 78%);
+}
+
+/* El escudo va troquelado en el centro, bien marcado sobre el oro. */
+.moneda img {
+  position: relative;
+  width: 76%;
+  height: 76%;
+  object-fit: contain;
+  filter: grayscale(1) contrast(2.4) brightness(0.22);
+  opacity: 0.95;
+  mix-blend-mode: multiply;
+}

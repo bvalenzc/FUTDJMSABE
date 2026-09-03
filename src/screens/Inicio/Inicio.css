@@ -1,0 +1,37 @@
+/* El menú entra completo en una pantalla: banner + 6 mosaicos + acceso admin. */
+.inicio {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  height: 100%;
+  padding: 10px 12px 6px;
+}
+
+.inicio__grilla {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: repeat(3, 1fr);
+  gap: 9px;
+}
+
+/* Acceso al panel de cartas, al pie, como el "+ admin" del proyecto anterior. */
+.inicio__admin {
+  align-self: center;
+  flex: none;
+  padding: 4px 8px;
+  border: none;
+  background: none;
+  color: var(--texto-tenue);
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.6px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.inicio__admin:active {
+  color: var(--texto-medio);
+}

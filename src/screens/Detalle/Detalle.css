@@ -1,0 +1,29 @@
+.detalle {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(120% 90% at 50% 20%, #1c1710 0%, #0a0908 70%);
+  perspective: 900px;
+}
+
+.detalle__volver {
+  position: absolute;
+  top: max(14px, env(safe-area-inset-top));
+  left: 16px;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f2ede1;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.detalle__escenario {
+  transform-style: preserve-3d;
+}

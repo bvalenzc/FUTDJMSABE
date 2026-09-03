@@ -1,0 +1,76 @@
+.mosaico {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 0;
+  padding: 9px;
+  overflow: hidden;
+  border: 1px solid var(--borde);
+  border-radius: var(--r-medio);
+  background: linear-gradient(150deg, #1c1509, #0d0b07 72%);
+  box-shadow: var(--sombra-hundida);
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.16s ease, border-color 0.16s ease;
+}
+
+.mosaico:active {
+  transform: scale(0.98);
+  border-color: var(--borde-fuerte);
+}
+
+/* halo cálido detrás de la vista previa */
+.mosaico::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(74% 62% at 50% 34%, rgba(232, 197, 101, 0.16), transparent 66%);
+}
+
+.mosaico__preview {
+  position: absolute;
+  top: 6px;
+  right: 0;
+  left: 0;
+  bottom: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.mosaico__titulo {
+  position: relative;
+  z-index: 3;
+  font-family: 'Anton', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #f0e6cc;
+}
+
+.mosaico__etiqueta {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  z-index: 3;
+  padding: 2px 7px;
+  border: 1px solid rgba(232, 197, 101, 0.3);
+  border-radius: 20px;
+  background: linear-gradient(135deg, #221a0c, #0a0908);
+  color: var(--oro-claro);
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mosaico {
+    transition: none;
+  }
+}

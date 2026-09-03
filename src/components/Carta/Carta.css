@@ -1,0 +1,759 @@
+.carta-marco {
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* ================= estructura común (ver README_cartas_djm.md §2) ================= */
+
+.carta {
+  position: relative;
+  transform-origin: top left;
+  overflow: hidden;
+  /* Sin esto, el mix-blend-mode del grabado se mezcla con el fondo de la página
+     y las cartas claras (plata) se ven negras sobre pantallas oscuras. */
+  isolation: isolate;
+  font-family: 'Barlow Condensed', sans-serif;
+  background: linear-gradient(163deg, var(--c1) 0%, var(--c2) 18%, var(--c3) 42%, var(--c4) 68%, var(--c5) 100%);
+  box-shadow: 0 26px 44px -14px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(0, 0, 0, 0.45);
+}
+
+.carta__grabado {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  color: var(--engrave);
+  opacity: var(--engrave-op);
+  mix-blend-mode: var(--engrave-blend);
+}
+
+.carta__textura {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.5;
+  background: repeating-linear-gradient(0deg, var(--turn) 0px, var(--turn) 1px, transparent 1px, transparent 4px);
+}
+
+.carta__figura {
+  position: absolute;
+  z-index: 2;
+}
+
+.carta__figura--silueta {
+  left: 50%;
+  bottom: 128px;
+  width: 250px;
+  transform: translateX(-50%);
+}
+
+/* Ventana de la foto: mismo hueco que ocupa la silueta, para que el marco de la carta
+   siga viéndose alrededor y el fondo original de la foto no compita con el grabado. */
+.carta__figura--foto {
+  left: 50%;
+  bottom: 128px;
+  width: 250px;
+  height: 320px;
+  transform: translateX(-50%);
+  overflow: hidden;
+  mask-image: radial-gradient(78% 86% at 50% 38%, #000 26%, rgba(0, 0, 0, 0.5) 58%, transparent 84%);
+}
+
+/* Con la foto ya recortada no hace falta difuminar el fondo: se ve la figura
+   limpia sobre el dorado, como en las cartas de FUT. */
+.carta__figura--recortada {
+  width: 262px;
+  height: 340px;
+  mask-image: linear-gradient(180deg, #000 78%, rgba(0, 0, 0, 0.7) 92%, transparent 100%);
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.45));
+}
+
+.carta__figura--foto img {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: auto;
+  max-width: none;
+}
+
+.carta__fig-cuerpo {
+  fill: var(--fig-body);
+}
+
+.carta__fig-sombra {
+  fill: var(--fig-body);
+  opacity: 0.28;
+}
+
+.carta__fig-borde {
+  fill: var(--fig-rim);
+  opacity: var(--fig-rim-op);
+}
+
+.carta__scrim {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 250px;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(180deg, var(--scrim-0) 0%, var(--scrim-1) 30%, var(--scrim-2) 62%, var(--scrim-3) 100%);
+}
+
+.carta__scrim-arriba {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 170px;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(180deg, var(--scrimtop) 0%, transparent 100%);
+}
+
+.carta__foil {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  mix-blend-mode: soft-light;
+  background: linear-gradient(
+    112deg,
+    transparent 26%,
+    rgba(255, 255, 255, var(--foil)) 42%,
+    rgba(255, 255, 255, calc(var(--foil) * 0.3)) 50%,
+    transparent 64%
+  );
+}
+
+.carta__capa-bg,
+.carta__capa-fg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.carta__capa-bg {
+  z-index: 1;
+}
+
+.carta__capa-fg {
+  z-index: 5;
+}
+
+.carta__ornamento {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+}
+
+.carta__o-oscuro {
+  stroke: var(--orn-dark);
+}
+
+.carta__o-claro {
+  stroke: var(--orn-light);
+}
+
+.carta__fd {
+  fill: var(--orn-dark);
+  stroke: none;
+}
+
+.carta__fl {
+  fill: var(--orn-light);
+  stroke: none;
+}
+
+/* ================= contenido ================= */
+
+.carta__id {
+  position: absolute;
+  top: 28px;
+  left: 30px;
+  z-index: 7;
+  color: var(--ink);
+}
+
+.carta__rating {
+  font-weight: 800;
+  font-size: 62px;
+  line-height: 0.78;
+  letter-spacing: -2px;
+  text-shadow: 0 1px 0 var(--ink-glow), 0 3px 8px rgba(0, 0, 0, 0.35);
+}
+
+.carta__pos {
+  margin-top: 8px;
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: 4px;
+  color: var(--pos-color, var(--ink-soft));
+}
+
+.carta__id-regla {
+  width: 44px;
+  height: 2px;
+  margin-top: 9px;
+  background: linear-gradient(90deg, var(--pos-color, var(--ink-soft)), transparent);
+}
+
+.carta__club {
+  position: absolute;
+  top: 32px;
+  right: 30px;
+  z-index: 7;
+  text-align: right;
+}
+
+/* Posiciones alternativas: etiquetas chicas y semitransparentes al costado. */
+.carta__alternativas {
+  position: absolute;
+  top: 96px;
+  right: 22px;
+  z-index: 7;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+}
+
+.carta__alternativas span {
+  padding: 2px 6px;
+  border: 1px solid color-mix(in srgb, var(--ink) 35%, transparent);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--ink) 16%, transparent);
+  color: var(--ink);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  opacity: 0.62;
+}
+
+.carta__club-marca {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 700;
+  font-size: 26px;
+  letter-spacing: 5px;
+  color: var(--ink);
+  text-shadow: 0 1px 0 var(--ink-glow);
+}
+
+.carta__club-sub {
+  margin-top: 2px;
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--sub-color, var(--ink-soft));
+}
+
+.carta__nombre {
+  position: absolute;
+  left: 30px;
+  right: 30px;
+  bottom: 158px;
+  z-index: 7;
+  text-transform: uppercase;
+  line-height: 0.95;
+}
+
+.carta__nombre-apellido {
+  display: block;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--name-main);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.carta__nombre-regla {
+  position: absolute;
+  left: 30px;
+  right: 30px;
+  bottom: 140px;
+  z-index: 7;
+  height: 8px;
+}
+
+.carta__nr {
+  stroke: var(--rule);
+}
+
+.carta__nrf {
+  fill: var(--rule);
+  stroke: none;
+}
+
+.carta__stats {
+  position: absolute;
+  left: 26px;
+  right: 26px;
+  bottom: 48px;
+  z-index: 7;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  row-gap: 18px;
+}
+
+.carta__stat {
+  position: relative;
+  text-align: center;
+}
+
+.carta__stat:not(:nth-child(3n))::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 1px;
+  bottom: 1px;
+  width: 1px;
+  background: linear-gradient(180deg, transparent 0%, var(--divider) 50%, transparent 100%);
+}
+
+.carta__stat-valor {
+  font-weight: 800;
+  font-size: 26px;
+  line-height: 1;
+  color: var(--name-main);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+.carta__stat-etiqueta {
+  margin-top: 5px;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 2.5px;
+  color: var(--name-sub);
+}
+
+.carta__footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 18px;
+  z-index: 7;
+  text-align: center;
+  font-weight: 600;
+  font-size: 9.5px;
+  letter-spacing: 6px;
+  color: var(--footer);
+}
+
+/* ================= temas ================= */
+
+.carta[data-rareza='plata'] {
+  --c1: #ffffff;
+  --c2: #eaeef1;
+  --c3: #c2cbd2;
+  --c4: #93a0a8;
+  --c5: #5e6a72;
+  --engrave: #1e2428;
+  --engrave-op: 0.34;
+  --engrave-blend: multiply;
+  --turn: rgba(30, 36, 40, 0.09);
+  --foil: 0.6;
+  --fig-body: #2c363c;
+  --fig-rim: #ffffff;
+  --fig-rim-op: 0.3;
+  --scrim-0: rgba(70, 80, 88, 0);
+  --scrim-1: rgba(64, 74, 82, 0.32);
+  --scrim-2: rgba(46, 55, 62, 0.66);
+  --scrim-3: rgba(34, 42, 48, 0.84);
+  --scrimtop: rgba(255, 255, 255, 0.55);
+  --orn-dark: #1e2428;
+  --orn-light: #ffffff;
+  --ink: #1b2226;
+  --ink-soft: #48545c;
+  --ink-glow: rgba(255, 255, 255, 0.7);
+  --name-main: #ffffff;
+  --name-sub: rgba(255, 255, 255, 0.85);
+  --rule: rgba(255, 255, 255, 0.65);
+  --divider: rgba(255, 255, 255, 0.45);
+  --footer: rgba(255, 255, 255, 0.5);
+}
+
+.carta[data-rareza='oro'] {
+  --c1: #fff7dc;
+  --c2: #efce79;
+  --c3: #c9962f;
+  --c4: #9c7420;
+  --c5: #6b4a12;
+  --engrave: #2b1b04;
+  --engrave-op: 0.36;
+  --engrave-blend: multiply;
+  --turn: rgba(43, 27, 4, 0.09);
+  --foil: 0.58;
+  --fig-body: #2b1b04;
+  --fig-rim: #fff7dc;
+  --fig-rim-op: 0.3;
+  --scrim-0: rgba(107, 74, 18, 0);
+  --scrim-1: rgba(101, 70, 16, 0.3);
+  --scrim-2: rgba(70, 47, 9, 0.62);
+  --scrim-3: rgba(52, 34, 5, 0.82);
+  --scrimtop: rgba(255, 247, 220, 0.55);
+  --orn-dark: #2b1b04;
+  --orn-light: #fff7dc;
+  --ink: #2b1b04;
+  --ink-soft: #5a3e10;
+  --ink-glow: rgba(255, 247, 220, 0.65);
+  --name-main: #fff7dc;
+  --name-sub: rgba(255, 247, 220, 0.85);
+  --rule: rgba(255, 247, 220, 0.6);
+  --divider: rgba(255, 247, 220, 0.42);
+  --footer: rgba(255, 247, 220, 0.5);
+}
+
+.carta[data-rareza='oro-raro'] {
+  --c1: #fff8d8;
+  --c2: #f5d775;
+  --c3: #dfae33;
+  --c4: #a87a17;
+  --c5: #5e3f08;
+  --engrave: #2b1b04;
+  --engrave-op: 0.46;
+  --engrave-blend: multiply;
+  --turn: rgba(43, 27, 4, 0.1);
+  --foil: 0.78;
+  --fig-body: #2b1b04;
+  --fig-rim: #fff7dc;
+  --fig-rim-op: 0.34;
+  --scrim-0: rgba(107, 74, 18, 0);
+  --scrim-1: rgba(101, 70, 16, 0.32);
+  --scrim-2: rgba(70, 47, 9, 0.66);
+  --scrim-3: rgba(52, 34, 5, 0.86);
+  --scrimtop: rgba(255, 248, 216, 0.62);
+  --orn-dark: #2b1b04;
+  --orn-light: #fff7dc;
+  --ink: #2b1b04;
+  --ink-soft: #5a3e10;
+  --ink-glow: rgba(255, 247, 220, 0.7);
+  --name-main: #fff7dc;
+  --name-sub: rgba(255, 247, 220, 0.85);
+  --rule: rgba(255, 247, 220, 0.68);
+  --divider: rgba(255, 247, 220, 0.48);
+  --footer: rgba(255, 247, 220, 0.55);
+}
+
+.carta[data-rareza='mvp'] {
+  --c1: #3a3630;
+  --c2: #242220;
+  --c3: #161514;
+  --c4: #0d0d0c;
+  --c5: #000000;
+  --engrave: #d9b45c;
+  --engrave-op: 0.3;
+  --engrave-blend: screen;
+  --turn: rgba(217, 180, 92, 0.05);
+  --foil: 0.3;
+  --fig-body: #000000;
+  --fig-rim: #d9b45c;
+  --fig-rim-op: 0.26;
+  --scrim-0: rgba(0, 0, 0, 0);
+  --scrim-1: rgba(0, 0, 0, 0.35);
+  --scrim-2: rgba(0, 0, 0, 0.72);
+  --scrim-3: rgba(0, 0, 0, 0.92);
+  --scrimtop: rgba(0, 0, 0, 0.55);
+  --orn-dark: #c9a24b;
+  --orn-light: #f2dda4;
+  --ink: #f0dca6;
+  --ink-soft: #c9a24b;
+  --ink-glow: rgba(0, 0, 0, 0.6);
+  --name-main: #f7eac4;
+  --name-sub: rgba(201, 162, 75, 0.9);
+  --rule: rgba(201, 162, 75, 0.8);
+  --divider: rgba(201, 162, 75, 0.5);
+  --footer: rgba(201, 162, 75, 0.65);
+}
+
+.carta[data-rareza='primer-gol'] {
+  --c1: #e9fbee;
+  --c2: #93e0ac;
+  --c3: #2fa163;
+  --c4: #146b3e;
+  --c5: #04301c;
+  --engrave: #04301c;
+  --engrave-op: 0.4;
+  --engrave-blend: multiply;
+  --turn: rgba(4, 48, 28, 0.09);
+  --foil: 0.52;
+  --fig-body: #04301c;
+  --fig-rim: #e9fbee;
+  --fig-rim-op: 0.3;
+  --scrim-0: rgba(8, 66, 40, 0);
+  --scrim-1: rgba(8, 62, 38, 0.34);
+  --scrim-2: rgba(5, 46, 28, 0.7);
+  --scrim-3: rgba(3, 32, 19, 0.9);
+  --scrimtop: rgba(233, 251, 238, 0.55);
+  --orn-dark: #04301c;
+  --orn-light: #e9fbee;
+  --ink: #04301c;
+  --ink-soft: #0e5733;
+  --ink-glow: rgba(233, 251, 238, 0.7);
+  --name-main: #eefcf2;
+  --name-sub: rgba(238, 252, 242, 0.85);
+  --rule: rgba(238, 252, 242, 0.68);
+  --divider: rgba(238, 252, 242, 0.45);
+  --footer: rgba(238, 252, 242, 0.55);
+}
+
+.carta[data-rareza='djdor'] {
+  --c1: #4e7fc4;
+  --c2: #26518f;
+  --c3: #123061;
+  --c4: #0a1d3f;
+  --c5: #040d22;
+  --engrave: #e3c069;
+  --engrave-op: 0.34;
+  --engrave-blend: screen;
+  --turn: rgba(227, 192, 105, 0.05);
+  --foil: 0.34;
+  --fig-body: #040d22;
+  --fig-rim: #e3c069;
+  --fig-rim-op: 0.28;
+  --scrim-0: rgba(4, 13, 34, 0);
+  --scrim-1: rgba(4, 13, 34, 0.38);
+  --scrim-2: rgba(3, 10, 26, 0.74);
+  --scrim-3: rgba(2, 7, 18, 0.93);
+  --scrimtop: rgba(78, 127, 196, 0.35);
+  --orn-dark: #e3c069;
+  --orn-light: #8fb8ec;
+  --ink: #f1d993;
+  --ink-soft: #8fb8ec;
+  --ink-glow: rgba(4, 13, 34, 0.7);
+  --name-main: #f6e6b4;
+  --name-sub: rgba(143, 184, 236, 0.92);
+  --rule: rgba(227, 192, 105, 0.85);
+  --divider: rgba(227, 192, 105, 0.5);
+  --footer: rgba(227, 192, 105, 0.7);
+}
+
+.carta[data-rareza='flashback'] {
+  --c1: #eaf9ff;
+  --c2: #9fdcf4;
+  --c3: #5aa6dc;
+  --c4: #6b4fb0;
+  --c5: #2a1560;
+  --engrave: #2a1560;
+  --engrave-op: 0.26;
+  --engrave-blend: multiply;
+  --turn: rgba(42, 21, 96, 0.07);
+  --foil: 0.46;
+  --fig-body: #2a1560;
+  --fig-rim: #eaf9ff;
+  --fig-rim-op: 0.32;
+  --scrim-0: rgba(42, 21, 96, 0);
+  --scrim-1: rgba(42, 21, 96, 0.34);
+  --scrim-2: rgba(32, 15, 74, 0.72);
+  --scrim-3: rgba(22, 10, 54, 0.92);
+  --scrimtop: rgba(234, 249, 255, 0.5);
+  --orn-dark: #2a1560;
+  --orn-light: #b9f0ff;
+  --ink: #20104e;
+  --ink-soft: #5b3aa0;
+  --ink-glow: rgba(234, 249, 255, 0.7);
+  --name-main: #f2fbff;
+  --name-sub: rgba(185, 240, 255, 0.9);
+  --rule: rgba(185, 240, 255, 0.75);
+  --divider: rgba(185, 240, 255, 0.45);
+  --footer: rgba(185, 240, 255, 0.6);
+}
+
+.carta[data-rareza='parche'] {
+  --c1: #fff6d6;
+  --c2: #edc974;
+  --c3: #c6912c;
+  --c4: #98701e;
+  --c5: #664410;
+  --engrave: #2b1b04;
+  --engrave-op: 0.36;
+  --engrave-blend: multiply;
+  --turn: rgba(43, 27, 4, 0.09);
+  --foil: 0.6;
+  --fig-body: #2b1b04;
+  --fig-rim: #fff7dc;
+  --fig-rim-op: 0.3;
+  --scrim-0: rgba(107, 74, 18, 0);
+  --scrim-1: rgba(101, 70, 16, 0.31);
+  --scrim-2: rgba(70, 47, 9, 0.64);
+  --scrim-3: rgba(52, 34, 5, 0.84);
+  --scrimtop: rgba(255, 246, 214, 0.55);
+  --orn-dark: #2b1b04;
+  --orn-light: #fff7dc;
+  --ink: #2b1b04;
+  --ink-soft: #5a3e10;
+  --ink-glow: rgba(255, 247, 220, 0.65);
+  --name-main: #fff7dc;
+  --name-sub: rgba(255, 247, 220, 0.85);
+  --rule: rgba(198, 62, 44, 0.75);
+  --divider: rgba(198, 62, 44, 0.45);
+  --footer: rgba(198, 62, 44, 0.75);
+  --pos-color: #9c2e1e;
+  --sub-color: #9c2e1e;
+}
+
+/* --- capa extra: DON JULIO D'OR --- */
+
+.carta__djd-oro {
+  stroke: #e3c069;
+}
+.carta__djd-azul {
+  stroke: #8fb8ec;
+}
+.carta__djd-oro-f {
+  fill: #e3c069;
+  stroke: none;
+}
+.carta__djd-azul-f {
+  fill: #8fb8ec;
+  stroke: none;
+}
+
+/* --- capa extra: FLASHBACK (flechas con glitch) --- */
+
+.carta__fb-pila {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.carta__fb-capa {
+  position: absolute;
+  inset: 0;
+}
+
+.carta__fb-capa svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.carta__fb-base {
+  color: #eaf9ff;
+  opacity: 0.3;
+}
+
+.carta__fb-cian {
+  color: #3fe6f5;
+  opacity: 0.55;
+  mix-blend-mode: screen;
+  animation: fb-glitch-a 4.2s steps(1) infinite;
+}
+
+.carta__fb-magenta {
+  color: #c77bff;
+  opacity: 0.55;
+  mix-blend-mode: screen;
+  animation: fb-glitch-b 4.2s steps(1) infinite;
+}
+
+.carta__fb-scan {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  opacity: 0.5;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.1) 0px,
+    rgba(255, 255, 255, 0.1) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+@keyframes fb-glitch-a {
+  0%,
+  78% {
+    transform: translate(0, 0);
+    clip-path: inset(0 0 0 0);
+  }
+  79% {
+    transform: translate(-7px, 2px);
+    clip-path: inset(14% 0 63% 0);
+  }
+  81% {
+    transform: translate(5px, -3px);
+    clip-path: inset(52% 0 26% 0);
+  }
+  83% {
+    transform: translate(-3px, 0);
+    clip-path: inset(72% 0 8% 0);
+  }
+  85%,
+  100% {
+    transform: translate(0, 0);
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes fb-glitch-b {
+  0%,
+  78% {
+    transform: translate(0, 0);
+    clip-path: inset(0 0 0 0);
+  }
+  79% {
+    transform: translate(7px, -2px);
+    clip-path: inset(30% 0 44% 0);
+  }
+  81% {
+    transform: translate(-6px, 3px);
+    clip-path: inset(8% 0 74% 0);
+  }
+  83% {
+    transform: translate(4px, 0);
+    clip-path: inset(60% 0 18% 0);
+  }
+  85%,
+  100% {
+    transform: translate(0, 0);
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .carta__fb-cian,
+  .carta__fb-magenta {
+    animation: none;
+  }
+}
+
+/* --- capa extra: PARCHE (costura roja) --- */
+
+.carta__pch-roja {
+  stroke: #b23a28;
+}
+
+.carta__pch-roja-f {
+  fill: #b23a28;
+  stroke: none;
+}
+
+.carta[data-rareza='parche'] .carta__stat-etiqueta {
+  color: rgba(156, 46, 30, 0.9);
+}
+
+.carta[data-rareza='parche'] .carta__club-marca {
+  text-shadow: 0 1px 0 var(--ink-glow), 0 0 12px rgba(178, 58, 40, 0.35);
+}
+
+.carta[data-rareza='parche'] .carta__rating {
+  text-shadow: 0 1px 0 var(--ink-glow), 2px 2px 0 rgba(178, 58, 40, 0.28), 0 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* ================= interacción (tilt 3D, solo detalle) ================= */
+
+.carta--interactiva {
+  transition: transform 0.15s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .carta--interactiva {
+    transition: none;
+  }
+}

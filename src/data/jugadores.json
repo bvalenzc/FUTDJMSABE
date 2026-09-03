@@ -1,0 +1,303 @@
+[
+  {
+    "id": "lucho",
+    "nombre": "LUCHO",
+    "posicion": "MCD",
+    "posiciones": [
+      "MCD",
+      "DFC",
+      "DC"
+    ],
+    "dorsal": 9,
+    "tipo": "plantel",
+    "tipoStats": "campo",
+    "media": 91,
+    "stats": {
+      "rit": 87,
+      "tir": 86,
+      "pas": 90,
+      "reg": 93,
+      "def": 92,
+      "fis": 91
+    },
+    "foto": "lucho"
+  },
+  {
+    "id": "vanti",
+    "nombre": "VANTI",
+    "posicion": "DC",
+    "posiciones": [
+      "DC",
+      "MC",
+      "DFC"
+    ],
+    "tipo": "plantel",
+    "tipoStats": "campo",
+    "media": 85,
+    "stats": {
+      "rit": 83,
+      "tir": 90,
+      "pas": 84,
+      "reg": 79,
+      "def": 70,
+      "fis": 85
+    },
+    "foto": "vanti"
+  },
+  {
+    "id": "chelo",
+    "nombre": "CHELO",
+    "posicion": "LI",
+    "posiciones": [
+      "LI",
+      "DFC",
+      "DC"
+    ],
+    "tipo": "plantel",
+    "tipoStats": "campo",
+    "media": 84,
+    "stats": {
+      "rit": 84,
+      "tir": 84,
+      "pas": 80,
+      "reg": 82,
+      "def": 85,
+      "fis": 87
+    },
+    "foto": "chelo"
+  },
+  {
+    "id": "banados",
+    "nombre": "BAÑADOS",
+    "posicion": "DFC",
+    "posiciones": [
+      "DFC",
+      "MD",
+      "DC"
+    ],
+    "tipo": "plantel",
+    "tipoStats": "campo",
+    "media": 84,
+    "stats": {
+      "rit": 84,
+      "tir": 80,
+      "pas": 80,
+      "reg": 84,
+      "def": 86,
+      "fis": 85
+    },
+    "foto": "banado"
+  },
+  {
+    "id": "valenz",
+    "nombre": "VALENZ",
+    "posicion": "MCO",
+    "posiciones": [
+      "MCO",
+      "MI",
+      "DC"
+    ],
+    "dorsal": 10,
+    "tipo": "plantel",
+    "tipoStats": "campo",
+    "media": 83,
+    "stats": {
+      "rit": 84,
+      "tir": 83,
+      "pas": 82,
+      "reg": 85,
+      "def": 55,
+      "fis": 76
+    },
+    "foto": "valenz",
+    "encuadre": {
+      "alto": 300,
+      "abajo": -18,
+      "x": 0
+    }
+  },
+  {
+    "id": "rafa",
+    "nombre": "RAFA",
+    "posicion": "MC",
+    "posiciones": [
+      "MC",
+      "DC",
+      "MD"
+    ],
+    "tipo": "plantel",
+    "tipoStats": "campo",
+    "media": 82,
+    "stats": {
+      "rit": 83,
+      "tir": 82,
+      "pas": 84,
+      "reg": 81,
+      "def": 65,
+      "fis": 79
+    },
+    "foto": "rafinha"
+  },
+  {
+    "id": "pelao",
+    "nombre": "PELAO",
+    "posicion": "ARQ",
+    "posiciones": [
+      "ARQ"
+    ],
+    "tipo": "plantel",
+    "tipoStats": "arquero",
+    "media": 82,
+    "stats": {
+      "est": 82,
+      "par": 83,
+      "saq": 70,
+      "ref": 84,
+      "vel": 79,
+      "col": 90
+    },
+    "foto": "pelaoizq"
+  },
+  {
+    "id": "pancho",
+    "nombre": "PANCHO",
+    "posicion": "DFC",
+    "posiciones": [
+      "DFC",
+      "LD"
+    ],
+    "tipo": "plantel",
+    "tipoStats": "campo",
+    "media": 81,
+    "stats": {
+      "rit": 76,
+      "tir": 65,
+      "pas": 70,
+      "reg": 67,
+      "def": 87,
+      "fis": 90
+    },
+    "foto": "pancho"
+  },
+  {
+    "id": "mau",
+    "nombre": "MAU",
+    "posicion": "MC",
+    "posiciones": [
+      "MC",
+      "DC",
+      "DFC"
+    ],
+    "tipo": "plantel",
+    "tipoStats": "campo",
+    "media": 74,
+    "stats": {
+      "rit": 65,
+      "tir": 69,
+      "pas": 75,
+      "reg": 73,
+      "def": 74,
+      "fis": 85
+    },
+    "foto": "mau"
+  },
+  {
+    "id": "mrillon",
+    "nombre": "MRILLON",
+    "posicion": "MD",
+    "posiciones": [
+      "MD",
+      "MI",
+      "DC"
+    ],
+    "tipo": "plantel",
+    "tipoStats": "campo",
+    "media": 74,
+    "stats": {
+      "rit": 84,
+      "tir": 65,
+      "pas": 72,
+      "reg": 69,
+      "def": 65,
+      "fis": 70
+    },
+    "foto": "mrillon"
+  },
+  {
+    "id": "vanti-mvp",
+    "nombre": "VANTI",
+    "persona": "VANTI",
+    "posicion": "DC",
+    "posiciones": [
+      "DC",
+      "MC",
+      "DFC"
+    ],
+    "tipo": "plantel",
+    "tipoStats": "campo",
+    "media": 86,
+    "rareza": "mvp",
+    "stats": {
+      "rit": 85,
+      "tir": 92,
+      "pas": 85,
+      "reg": 80,
+      "def": 70,
+      "fis": 86
+    },
+    "foto": "vanti"
+  },
+  {
+    "id": "mau-primer-gol",
+    "nombre": "MAU",
+    "persona": "MAU",
+    "posicion": "MC",
+    "posiciones": [
+      "MC",
+      "DC",
+      "DFC"
+    ],
+    "tipo": "plantel",
+    "tipoStats": "campo",
+    "media": 76,
+    "rareza": "primer-gol",
+    "stats": {
+      "rit": 67,
+      "tir": 75,
+      "pas": 78,
+      "reg": 75,
+      "def": 74,
+      "fis": 86
+    },
+    "foto": "mau"
+  },
+  {
+    "id": "valenz-flashback",
+    "nombre": "VALENZ",
+    "persona": "VALENZ",
+    "posicion": "MCO",
+    "posiciones": [
+      "MCO",
+      "MI",
+      "DC"
+    ],
+    "tipo": "plantel",
+    "tipoStats": "campo",
+    "media": 90,
+    "rareza": "flashback",
+    "stats": {
+      "rit": 87,
+      "tir": 87,
+      "pas": 88,
+      "reg": 91,
+      "def": 72,
+      "fis": 82
+    },
+    "foto": "valenz",
+    "encuadre": {
+      "alto": 300,
+      "abajo": -18,
+      "x": 0
+    }
+  }
+]

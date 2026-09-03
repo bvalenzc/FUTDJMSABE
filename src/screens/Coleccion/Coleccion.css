@@ -1,0 +1,48 @@
+.coleccion__rotulo {
+  padding: 6px 14px 2px;
+}
+
+.coleccion__grilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(94px, 1fr));
+  gap: 12px 8px;
+  padding: 6px 12px 16px;
+  justify-items: center;
+}
+
+.coleccion__slot {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: transform 0.14s ease;
+}
+
+.coleccion__slot:active {
+  transform: scale(0.95);
+}
+
+.coleccion__orden {
+  padding: 6px 11px;
+  border: none;
+  border-radius: var(--r-chico);
+  background: var(--superficie);
+  color: var(--texto-medio);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.coleccion__vacio {
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--texto-tenue);
+  font-size: 14px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coleccion__slot {
+    transition: none;
+  }
+}

@@ -1,0 +1,109 @@
+/* Botón principal: hereda el .btn-hero del proyecto anterior (brillo que barre incluido). */
+.banner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  width: 100%;
+  height: 124px;
+  flex: none;
+  padding: 16px;
+  overflow: hidden;
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--r-grande);
+  background: linear-gradient(135deg, #22190f, #0a0908 70%);
+  box-shadow: var(--sombra), var(--sombra-hundida);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.banner:active {
+  transform: scale(0.985);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+}
+
+.banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(70% 90% at 100% 0%, rgba(232, 197, 101, 0.26), transparent 60%);
+}
+
+.banner::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -70%;
+  width: 60%;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.09) 45%, transparent 60%);
+  animation: banner-brillo 5s ease-in-out infinite;
+}
+
+@keyframes banner-brillo {
+  0%,
+  60% {
+    left: -70%;
+  }
+  100% {
+    left: 130%;
+  }
+}
+
+.banner__escudo {
+  position: absolute;
+  right: -18px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 132px;
+  opacity: 0.1;
+  filter: grayscale(1);
+  pointer-events: none;
+}
+
+.banner__figura {
+  position: absolute;
+  right: 8px;
+  bottom: 0;
+  height: 120px;
+  width: auto;
+  object-fit: contain;
+  object-position: bottom;
+  filter: drop-shadow(-8px 6px 14px rgba(0, 0, 0, 0.6));
+  mask-image: linear-gradient(180deg, #000 86%, transparent 100%);
+  pointer-events: none;
+}
+
+.banner__velo {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(96deg, #0b0a07 4%, rgba(11, 10, 7, 0.8) 34%, rgba(11, 10, 7, 0.08) 64%, transparent 100%);
+}
+
+.banner__texto {
+  position: relative;
+  z-index: 2;
+}
+
+.banner__titulo {
+  margin: 4px 0 3px;
+  font-family: 'Anton', sans-serif;
+  font-size: 30px;
+  letter-spacing: 0.5px;
+  line-height: 1.05;
+  color: #fff;
+}
+
+.banner__sub {
+  display: block;
+  max-width: 170px;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: #b8ac8e;
+}
+

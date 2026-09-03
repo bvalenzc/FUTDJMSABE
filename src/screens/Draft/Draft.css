@@ -1,0 +1,302 @@
+.draft__paso {
+  padding: 12px 14px;
+}
+
+.draft__paso h2 {
+  margin: 0 0 12px;
+}
+
+.draft__formaciones {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+.draft__formaciones button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 11px;
+  border: 1px solid var(--borde);
+  border-radius: var(--r-medio);
+  background: var(--superficie);
+  color: #f0e6cc;
+  font-family: 'Anton', sans-serif;
+  font-size: 12.5px;
+  letter-spacing: 0.6px;
+  cursor: pointer;
+  transition: border-color 0.16s ease, transform 0.16s ease;
+}
+
+.draft__formaciones button:active {
+  transform: scale(0.98);
+  border-color: var(--borde-fuerte);
+}
+
+.mini-cancha {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--r-chico);
+  background: linear-gradient(180deg, #17331f, #0b1a11);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.mini-cancha span {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 50%;
+  background: var(--oro-claro);
+}
+
+.draft__opciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.draft__opciones button {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: transform 0.16s ease;
+}
+
+.draft__opciones button:active {
+  transform: scale(0.96);
+}
+
+.draft__cancha-envoltorio {
+  padding: 8px 12px 12px;
+}
+
+/* ---------- marcador con media y química ---------- */
+
+.draft__marcador {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  padding: 4px 2px 10px;
+}
+
+.draft__medida {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.draft__medida strong {
+  font-family: 'Anton', sans-serif;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--oro-claro);
+}
+
+.draft__medida em {
+  font-style: normal;
+  font-size: 13px;
+  color: var(--texto-tenue);
+}
+
+.draft__medida--quimica {
+  flex: 1;
+  max-width: 150px;
+}
+
+.draft__barra {
+  height: 5px;
+  margin-top: 4px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.draft__barra span {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--oro), var(--oro-claro));
+  transition: width 0.28s ease;
+}
+
+.draft__formacion-nombre {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: var(--texto-tenue);
+}
+
+/* ---------- cancha ---------- */
+
+.draft__cancha {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1.28;
+  border-radius: var(--r-medio);
+  background:
+    repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0 26px, transparent 26px 52px),
+    linear-gradient(180deg, #17331f, #0b1a11);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.draft__slot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: transform 0.16s ease;
+}
+
+.draft__slot--elegido {
+  transform: translate(-50%, -50%) scale(1.08);
+  filter: drop-shadow(0 0 8px var(--oro-claro));
+}
+
+.draft__banco-slot.draft__slot--elegido {
+  transform: scale(1.08);
+}
+
+.draft__slot-vacio {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 64px;
+  border: 1px dashed rgba(232, 197, 101, 0.35);
+  border-radius: var(--r-chico);
+  color: rgba(232, 197, 101, 0.6);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+/* Puntos de química que aporta el slot. */
+.draft__quimica {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  min-width: 17px;
+  height: 17px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #2a2419;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12);
+  color: var(--texto-tenue);
+  font-size: 9.5px;
+  font-weight: 800;
+}
+
+.draft__quimica--ok {
+  background: linear-gradient(180deg, var(--oro-claro), var(--oro));
+  box-shadow: none;
+  color: #1c1600;
+}
+
+.draft__cinta {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--oro-claro);
+  color: #1c1600;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 16px;
+  text-align: center;
+}
+
+.draft__titulo-banco {
+  margin: 14px 0 7px;
+}
+
+.draft__banco {
+  display: flex;
+  gap: 9px;
+}
+
+.draft__banco-slot {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: transform 0.16s ease;
+}
+
+.draft__pista {
+  margin: 10px 0 0;
+  font-size: 11.5px;
+  color: var(--texto-medio);
+}
+
+.draft__terminar {
+  width: 100%;
+  margin-top: 14px;
+  padding: 14px;
+}
+
+.draft__final p {
+  margin: 14px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--texto-medio);
+}
+
+.draft__final strong {
+  color: var(--oro-claro);
+}
+
+.draft__acciones {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.draft__acciones button {
+  flex: 1;
+  padding: 13px 10px;
+}
+
+/* ---------- selector ---------- */
+
+.draft__picker {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(5, 4, 3, 0.84);
+}
+
+.draft__picker-caja {
+  width: 100%;
+  max-width: var(--ancho-app);
+  padding: 16px 14px calc(16px + env(safe-area-inset-bottom));
+  border-radius: var(--r-grande) var(--r-grande) 0 0;
+  background: #120e08;
+  border-top: 1px solid var(--borde);
+}
+
+.draft__picker-caja h2 {
+  margin: 0 0 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .draft__slot,
+  .draft__banco-slot,
+  .draft__opciones button,
+  .draft__formaciones button,
+  .draft__barra span {
+    transition: none;
+  }
+}

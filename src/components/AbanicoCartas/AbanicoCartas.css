@@ -1,0 +1,17 @@
+.abanico {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.abanico__item {
+  position: absolute;
+  bottom: 0;
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.5));
+}
+
+.abanico--atenuado {
+  filter: grayscale(0.85) brightness(0.5);
+  opacity: 0.55;
+}

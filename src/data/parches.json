@@ -1,0 +1,107 @@
+[
+  {
+    "id": "puente",
+    "nombre": "PUENTE",
+    "posicion": "MCD",
+    "posiciones": [
+      "MCD",
+      "MC",
+      "DFC"
+    ],
+    "tipo": "parche",
+    "tipoStats": "campo",
+    "media": 84,
+    "stats": {
+      "rit": 82,
+      "tir": 84,
+      "pas": 90,
+      "reg": 85,
+      "def": 79,
+      "fis": 83
+    },
+    "foto": "puente"
+  },
+  {
+    "id": "nikolai",
+    "nombre": "NIKOLAI",
+    "posicion": "MI",
+    "posiciones": [
+      "MI",
+      "MC",
+      "DC"
+    ],
+    "tipo": "parche",
+    "tipoStats": "campo",
+    "media": 83,
+    "stats": {
+      "rit": 85,
+      "tir": 82,
+      "pas": 82,
+      "reg": 84,
+      "def": 76,
+      "fis": 78
+    }
+  },
+  {
+    "id": "mvalenz",
+    "nombre": "MVALENZ",
+    "posicion": "DC",
+    "posiciones": [
+      "DC",
+      "MI",
+      "MC"
+    ],
+    "tipo": "parche",
+    "tipoStats": "campo",
+    "media": 83,
+    "stats": {
+      "rit": 82,
+      "tir": 87,
+      "pas": 82,
+      "reg": 84,
+      "def": 75,
+      "fis": 74
+    },
+    "foto": "maxv"
+  },
+  {
+    "id": "costas",
+    "nombre": "COSTAS",
+    "posicion": "ARQ",
+    "posiciones": [
+      "ARQ"
+    ],
+    "tipo": "parche",
+    "tipoStats": "arquero",
+    "media": 81,
+    "stats": {
+      "est": 82,
+      "par": 84,
+      "saq": 74,
+      "ref": 79,
+      "vel": 83,
+      "col": 83
+    },
+    "foto": "costas"
+  },
+  {
+    "id": "tito",
+    "nombre": "TITO",
+    "posicion": "ARQ",
+    "posiciones": [
+      "ARQ"
+    ],
+    "tipo": "parche",
+    "tipoStats": "arquero",
+    "media": 78,
+    "stats": {
+      "est": 75,
+      "par": 71,
+      "saq": 84,
+      "ref": 80,
+      "vel": 79,
+      "col": 81
+    },
+    "foto": "tito"
+  }
+]

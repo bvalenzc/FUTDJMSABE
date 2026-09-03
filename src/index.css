@@ -1,0 +1,51 @@
+@import './estilos/tokens.css';
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--tinta);
+  color: var(--texto);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse 90% 40% at 50% 0%, rgba(232, 197, 101, 0.12), transparent 60%),
+    repeating-linear-gradient(115deg, rgba(232, 197, 101, 0.02) 0 1px, transparent 1px 46px),
+    linear-gradient(175deg, #141109, #0a0908 60%);
+  background-attachment: fixed;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+img {
+  max-width: 100%;
+}
+
+/* Aviso flotante compartido. */
+.aviso-toast {
+  position: fixed;
+  left: 50%;
+  bottom: max(84px, calc(env(safe-area-inset-bottom) + 84px));
+  transform: translateX(-50%);
+  z-index: 40;
+  padding: 10px 16px;
+  border: 1px solid var(--borde);
+  border-radius: 20px;
+  background: rgba(23, 18, 9, 0.96);
+  color: var(--texto);
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: var(--sombra);
+}

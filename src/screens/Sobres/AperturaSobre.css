@@ -1,0 +1,378 @@
+.apertura {
+  min-height: 68vh;
+  background: radial-gradient(120% 60% at 50% 6%, rgba(232, 197, 101, 0.09) 0%, transparent 68%);
+  transition: background 0.35s ease;
+}
+
+/* Revelación especial: la pantalla entera se pone en blanco. */
+.apertura--blanco::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+  background: #fff;
+  animation: blanquear 0.35s ease-out;
+}
+
+@keyframes blanquear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.apertura__revelado {
+  position: fixed;
+  inset: 0;
+  z-index: 26;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #0a0908;
+}
+
+.apertura__media {
+  font-family: 'Anton', sans-serif;
+  font-size: 104px;
+  line-height: 1;
+  color: #0a0908;
+  animation: media-entra 0.4s ease-out;
+}
+
+.apertura__posicion {
+  font-family: 'Anton', sans-serif;
+  font-size: 26px;
+  letter-spacing: 6px;
+  color: #6e5717;
+  animation: media-entra 0.4s ease-out;
+}
+
+@keyframes media-entra {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.apertura__centro {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 22px 16px 40px;
+}
+
+.apertura__sobre-boton {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: transform 0.16s ease;
+}
+
+.apertura__sobre-boton:active {
+  transform: scale(0.98);
+}
+
+/* ---------- arte del sobre ---------- */
+
+.sobre-arte {
+  position: relative;
+  width: 216px;
+  height: 300px;
+  overflow: hidden;
+  border: 3px solid rgba(255, 255, 255, 0.6);
+  border-radius: 18px;
+  background: linear-gradient(150deg, var(--sa1) 0%, var(--sa2) 22%, var(--sa3) 55%, var(--sa4) 100%);
+  box-shadow:
+    0 26px 48px -16px rgba(0, 0, 0, 0.75),
+    inset 0 2px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -34px 44px rgba(0, 0, 0, 0.28);
+  color: var(--sa-tinta);
+}
+
+.sobre-arte--mono {
+  --sa1: #f7f7f7;
+  --sa2: #cfcfcf;
+  --sa3: #6a6a6a;
+  --sa4: #141414;
+  --sa-tinta: #101010;
+}
+.sobre-arte--bronce {
+  --sa1: #f4c98c;
+  --sa2: #d99a5c;
+  --sa3: #8b5220;
+  --sa4: #2a1608;
+  --sa-tinta: #2a1907;
+}
+.sobre-arte--verde {
+  --sa1: #aef4ff;
+  --sa2: #6be3f2;
+  --sa3: #147c92;
+  --sa4: #031c20;
+  --sa-tinta: #052a30;
+}
+.sobre-arte--purpura {
+  --sa1: #ecdcff;
+  --sa2: #c9a3ff;
+  --sa3: #6f43c4;
+  --sa4: #1a0d38;
+  --sa-tinta: #24124a;
+}
+.sobre-arte--azul {
+  --sa1: #cfe6ff;
+  --sa2: #7db8ff;
+  --sa3: #2b5da8;
+  --sa4: #0a1a38;
+  --sa-tinta: #0c2450;
+}
+.sobre-arte--oro {
+  --sa1: #fffbe8;
+  --sa2: #ffe9a0;
+  --sa3: #c9a13c;
+  --sa4: #2a1e08;
+  --sa-tinta: #2b1b04;
+}
+
+.sobre-arte__trama {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0 3px, transparent 3px 20px);
+  mix-blend-mode: overlay;
+  opacity: 0.7;
+}
+
+.sobre-arte__brillo {
+  position: absolute;
+  top: -50%;
+  bottom: -50%;
+  left: -65%;
+  width: 40%;
+  transform: rotate(14deg);
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.6) 45%, transparent 62%);
+  animation: sobre-brillo 3.6s ease-in-out infinite;
+}
+
+@keyframes sobre-brillo {
+  0%,
+  55% {
+    left: -65%;
+  }
+  100% {
+    left: 145%;
+  }
+}
+
+.sobre-arte__marco {
+  position: absolute;
+  inset: 14px;
+  border: 1.5px solid currentColor;
+  border-radius: 10px;
+  opacity: 0.4;
+}
+
+.sobre-arte__esquina {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  opacity: 0.85;
+}
+
+.sobre-arte__esquina--si {
+  top: 10px;
+  left: 10px;
+  border-right: none;
+  border-bottom: none;
+  border-radius: 7px 0 0 0;
+}
+.sobre-arte__esquina--sd {
+  top: 10px;
+  right: 10px;
+  border-left: none;
+  border-bottom: none;
+  border-radius: 0 7px 0 0;
+}
+.sobre-arte__esquina--ii {
+  bottom: 10px;
+  left: 10px;
+  border-right: none;
+  border-top: none;
+  border-radius: 0 0 0 7px;
+}
+.sobre-arte__esquina--id {
+  bottom: 10px;
+  right: 10px;
+  border-left: none;
+  border-top: none;
+  border-radius: 0 0 7px 0;
+}
+
+.sobre-arte__djm {
+  position: absolute;
+  top: 44px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: 'Anton', sans-serif;
+  font-size: 38px;
+  letter-spacing: 6px;
+  color: currentColor;
+  text-shadow: 0 2px 5px rgba(255, 255, 255, 0.25);
+}
+
+.sobre-arte__nombre {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 52%;
+  text-align: center;
+  font-family: 'Anton', sans-serif;
+  font-size: 15px;
+  letter-spacing: 1.4px;
+  color: #fff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
+}
+
+.sobre-arte__cartas {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 24px;
+  text-align: center;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: #fff;
+  opacity: 0.8;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* ---------- giro ---------- */
+
+.apertura__giro {
+  position: relative;
+  width: 216px;
+  height: 300px;
+  transform-style: preserve-3d;
+}
+
+.apertura__giro--normal {
+  animation: girar 0.9s ease-in-out forwards;
+}
+
+.apertura__giro--rapido {
+  animation: girar-rapido 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes girar {
+  to {
+    transform: rotateY(180deg);
+  }
+}
+
+@keyframes girar-rapido {
+  to {
+    transform: rotateY(1080deg);
+  }
+}
+
+.apertura__cara {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.apertura__cara--dorso {
+  transform: rotateY(180deg);
+  border-radius: 18px;
+  background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--brillo) 45%, #120f08) 0%, #0b0906 72%);
+  box-shadow: 0 0 60px -6px var(--brillo);
+}
+
+.apertura__destellos {
+  position: absolute;
+  inset: 0;
+  background: repeating-conic-gradient(from 0deg at 50% 45%, var(--brillo) 0deg 1.2deg, transparent 1.2deg 9deg);
+  opacity: 0.5;
+  mask-image: radial-gradient(circle at 50% 45%, #000 12%, transparent 68%);
+  animation: destellar 2.6s linear infinite;
+}
+
+@keyframes destellar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- carta revelada ---------- */
+
+.apertura__carta {
+  animation: carta-entra 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+@keyframes carta-entra {
+  from {
+    opacity: 0;
+    transform: scale(0.78) translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.apertura__repetida {
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: rgba(147, 32, 43, 0.9);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.apertura__boton {
+  padding: 13px 22px;
+}
+
+.apertura__resumen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 22px 16px 40px;
+}
+
+.apertura__grilla {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  justify-content: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .apertura__giro--normal,
+  .apertura__giro--rapido {
+    animation-duration: 0.01s;
+  }
+  .apertura__carta,
+  .apertura__media,
+  .apertura__posicion,
+  .apertura__destellos,
+  .sobre-arte__brillo {
+    animation: none;
+  }
+}

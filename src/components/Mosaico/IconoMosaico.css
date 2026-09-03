@@ -1,0 +1,32 @@
+.icono-mosaico {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 34%, rgba(232, 197, 101, 0.18), rgba(232, 197, 101, 0.04) 62%, transparent 72%);
+}
+
+/* Anillo grabado, del mismo lenguaje que el guilloché de las cartas. */
+.icono-mosaico::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  border: 1px solid rgba(232, 197, 101, 0.28);
+  background: repeating-conic-gradient(
+    from 0deg at 50% 50%,
+    rgba(232, 197, 101, 0.16) 0deg 0.5deg,
+    transparent 0.5deg 7deg
+  );
+  mask-image: radial-gradient(circle, transparent 58%, #000 60%, #000 96%, transparent 100%);
+}
+
+.icono-mosaico svg {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  stroke: var(--oro-claro);
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
+}
