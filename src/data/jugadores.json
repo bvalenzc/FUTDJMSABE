@@ -344,5 +344,29 @@
       "col": 91
     },
     "foto": "pelaoizq"
+  },
+  {
+    "id": "banados-mvp",
+    "nombre": "BAÑADOS",
+    "persona": "BAÑADOS",
+    "posicion": "MC",
+    "posiciones": [
+      "MC",
+      "DFC",
+      "MI"
+    ],
+    "tipo": "plantel",
+    "tipoStats": "campo",
+    "media": 86,
+    "rareza": "mvp",
+    "stats": {
+      "rit": 87,
+      "tir": 83,
+      "pas": 82,
+      "reg": 86,
+      "def": 87,
+      "fis": 87
+    },
+    "foto": "banado"
   }
 ]
