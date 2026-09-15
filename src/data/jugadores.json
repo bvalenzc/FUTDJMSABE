@@ -368,5 +368,223 @@
       "fis": 87
     },
     "foto": "banado"
+  },
+  {
+    "id": "varela",
+    "nombre": "VARELA",
+    "posicion": "MC",
+    "posiciones": [
+      "MC",
+      "MI",
+      "MCO"
+    ],
+    "tipo": "plantel",
+    "tipoStats": "campo",
+    "media": 85,
+    "stats": {
+      "rit": 84,
+      "tir": 90,
+      "pas": 87,
+      "reg": 88,
+      "def": 78,
+      "fis": 76
+    },
+    "foto": "varela"
+  },
+  {
+    "id": "joaco-v",
+    "nombre": "JOACO V",
+    "posicion": "MCD",
+    "posiciones": [
+      "MCD",
+      "MC",
+      "DFC"
+    ],
+    "tipo": "plantel",
+    "tipoStats": "campo",
+    "media": 89,
+    "stats": {
+      "rit": 85,
+      "tir": 87,
+      "pas": 84,
+      "reg": 88,
+      "def": 90,
+      "fis": 91
+    }
+  },
+  {
+    "id": "pelao-djdor",
+    "nombre": "PELAO",
+    "persona": "PELAO",
+    "posicion": "ARQ",
+    "posiciones": [
+      "ARQ"
+    ],
+    "tipo": "plantel",
+    "tipoStats": "arquero",
+    "media": 95,
+    "rareza": "djdor",
+    "stats": {
+      "est": 90,
+      "par": 94,
+      "saq": 88,
+      "ref": 96,
+      "vel": 98,
+      "col": 99
+    },
+    "foto": "pelaoizq"
+  },
+  {
+    "id": "lucho-djdor",
+    "nombre": "LUCHO",
+    "persona": "LUCHO",
+    "posicion": "DFC",
+    "posiciones": [
+      "DFC",
+      "MCD",
+      "MC",
+      "DC"
+    ],
+    "tipo": "plantel",
+    "tipoStats": "campo",
+    "media": 99,
+    "rareza": "djdor",
+    "stats": {
+      "rit": 97,
+      "tir": 94,
+      "pas": 96,
+      "reg": 99,
+      "def": 99,
+      "fis": 98
+    },
+    "foto": "lucho"
+  },
+  {
+    "id": "pancho-djdor",
+    "nombre": "PANCHO",
+    "persona": "PANCHO",
+    "posicion": "LI",
+    "posiciones": [
+      "LI",
+      "DFC",
+      "LD"
+    ],
+    "tipo": "plantel",
+    "tipoStats": "campo",
+    "media": 95,
+    "rareza": "djdor",
+    "stats": {
+      "rit": 93,
+      "tir": 82,
+      "pas": 88,
+      "reg": 83,
+      "def": 97,
+      "fis": 99
+    },
+    "foto": "pancho"
+  },
+  {
+    "id": "banados-djdor",
+    "nombre": "BAÑADOS",
+    "persona": "BAÑADOS",
+    "posicion": "LD",
+    "posiciones": [
+      "LD",
+      "DFC",
+      "MD",
+      "DC"
+    ],
+    "tipo": "plantel",
+    "tipoStats": "campo",
+    "media": 97,
+    "rareza": "djdor",
+    "stats": {
+      "rit": 99,
+      "tir": 93,
+      "pas": 89,
+      "reg": 91,
+      "def": 96,
+      "fis": 94
+    },
+    "foto": "banado"
+  },
+  {
+    "id": "valenz-djdor",
+    "nombre": "VALENZ",
+    "persona": "VALENZ",
+    "posicion": "MCO",
+    "posiciones": [
+      "MCO",
+      "MI",
+      "MC",
+      "MD",
+      "DC"
+    ],
+    "tipo": "plantel",
+    "tipoStats": "campo",
+    "media": 97,
+    "rareza": "djdor",
+    "stats": {
+      "rit": 92,
+      "tir": 94,
+      "pas": 98,
+      "reg": 99,
+      "def": 87,
+      "fis": 89
+    },
+    "foto": "valenzflash",
+    "encuadre": {
+      "alto": 326,
+      "abajo": 10,
+      "x": 4
+    }
+  },
+  {
+    "id": "rafa-djdor",
+    "nombre": "RAFA",
+    "persona": "RAFA",
+    "posicion": "MD",
+    "posiciones": [
+      "MD",
+      "MC",
+      "DC"
+    ],
+    "tipo": "plantel",
+    "tipoStats": "campo",
+    "media": 96,
+    "rareza": "djdor",
+    "stats": {
+      "rit": 92,
+      "tir": 94,
+      "pas": 95,
+      "reg": 92,
+      "def": 85,
+      "fis": 88
+    },
+    "foto": "rafinha"
+  },
+  {
+    "id": "vanti-djdor",
+    "nombre": "VANTI",
+    "persona": "VANTI",
+    "posicion": "DC",
+    "posiciones": [
+      "DC",
+      "DFC",
+      "MCD"
+    ],
+    "tipo": "plantel",
+    "tipoStats": "campo",
+    "media": 98,
+    "rareza": "djdor",
+    "stats": {
+      "rit": 92,
+      "tir": 99,
+      "pas": 94,
+      "reg": 95,
+      "def": 90,
+      "fis": 94
+    },
+    "foto": "vanti"
   }
 ]

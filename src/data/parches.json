@@ -129,28 +129,6 @@
     "foto": "maxv"
   },
   {
-    "id": "varela",
-    "nombre": "VARELA",
-    "posicion": "MC",
-    "posiciones": [
-      "MC",
-      "MI",
-      "MCO"
-    ],
-    "tipo": "parche",
-    "tipoStats": "campo",
-    "media": 85,
-    "stats": {
-      "rit": 84,
-      "tir": 90,
-      "pas": 87,
-      "reg": 88,
-      "def": 78,
-      "fis": 76
-    },
-    "foto": "varela"
-  },
-  {
     "id": "mango",
     "nombre": "MANGO",
     "posicion": "DC",
