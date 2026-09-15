@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { FORMACIONES, sobrePorId } from '../../config/juego'
+import { FORMACIONES, sobrePorId, type SlotFormacion } from '../../config/juego'
 import { GRUPO_DJM, copaInfo, type EquipoLiga, type GrupoLiga } from '../../config/liga'
 import { grupoPorId } from '../../config/liga'
 import {
@@ -15,6 +15,7 @@ import { useJuego } from '../../juego/useJuego'
 import { Carta } from '../../components/Carta/Carta'
 import { EscudoEquipo } from '../../components/EscudoEquipo/EscudoEquipo'
 import { Minijuego } from '../../components/Minijuego/Minijuego'
+import { MinijuegoPase } from '../../components/Minijuego/MinijuegoPase'
 import { Moneda } from '../../components/Moneda/Moneda'
 import { Pantalla } from '../../components/Pantalla/Pantalla'
 import type { Jugador, StatsArquero, StatsCampo } from '../../types/jugador'
@@ -24,14 +25,21 @@ type Recompensa = { monedas: number; packs: string[]; mvpId: string | null }
 
 type Props = { onVolver: () => void; onFin: () => void }
 
-type TipoEvento = 'ataque' | 'defensa' | 'tarjeta' | 'lesion'
+type TipoEvento = 'ataque' | 'pase' | 'defensa' | 'tarjeta' | 'lesion'
 type Evento = { minuto: number; tipo: TipoEvento; equipo: 'djm' | 'rival' }
 type EventoResuelto = Evento & { exito?: boolean }
 
 const PACKS_GANA = ['veliz', 'djm']
 const PACKS_PIERDE = ['euforia', 'nuende']
-/** Penalización de fuerza (sobre 99) que deja una tarjeta roja para lo que resta del partido. */
-const PENALIZACION_ROJA = 9
+/** Probabilidades de tarjeta por cada incidente de tipo "tarjeta" (no por partido:
+ *  un partido tiene 1-2 incidentes en promedio, así que esto deja la chance real
+ *  de ver una tarjeta durante todo el partido cerca del 1% roja / 5% amarilla). */
+const PROB_ROJA_DIRECTA = 0.01
+const PROB_AMARILLA = 0.05
+/** Cuánto sube/baja la chance de DJM en cada jugada por cada expulsado propio/rival. */
+const AJUSTE_POR_EXPULSION = 0.15
+/** Posiciones desde las que puede salir el que define un pase-gol. */
+const POSICIONES_GOLEADOR = ['DC', 'MI', 'MD', 'MC', 'MCO']
 
 function clamp(n: number, min: number, max: number) {
   return Math.min(max, Math.max(min, n))
@@ -57,7 +65,9 @@ function probabilidadChanceDjm(mediaDjm: number, rivalPoder: number): number {
   return clamp(sigmoide((mediaDjm - rivalPoder) * 1.3, 40), 0.12, 0.88)
 }
 
-/** 8 a 12 eventos por partido: la mayoría chances de gol, más alguna tarjeta o lesión. */
+/** 8 a 12 eventos por partido: la mayoría chances de gol, más alguna tarjeta o lesión.
+ *  Una chance de DJM sale como remate directo ("ataque") o como jugada de pase-gol
+ *  ("pase"), mitad y mitad. */
 function generarEventos(mediaDjm: number, rivalPoder: number): Evento[] {
   const total = 8 + Math.floor(Math.random() * 5)
   const probDjm = probabilidadChanceDjm(mediaDjm, rivalPoder)
@@ -65,8 +75,9 @@ function generarEventos(mediaDjm: number, rivalPoder: number): Evento[] {
   return minutos.map((minuto) => {
     const r = Math.random()
     if (r < 0.65) {
-      const equipo: 'djm' | 'rival' = Math.random() < probDjm ? 'djm' : 'rival'
-      return { minuto, tipo: equipo === 'djm' ? 'ataque' : 'defensa', equipo }
+      if (Math.random() >= probDjm) return { minuto, tipo: 'defensa', equipo: 'rival' }
+      const tipo: TipoEvento = Math.random() < 0.5 ? 'pase' : 'ataque'
+      return { minuto, tipo, equipo: 'djm' }
     }
     const tipo: TipoEvento = r < 0.85 ? 'tarjeta' : 'lesion'
     return { minuto, tipo, equipo: Math.random() < 0.5 ? 'djm' : 'rival' }
@@ -108,8 +119,10 @@ export function Partido({ onVolver, onFin }: Props) {
   const [flavor, flavorSet] = useState<string | null>(null)
   const [recompensa, recompensaSet] = useState<Recompensa | null>(null)
   const [minutoMostrado, minutoMostradoSet] = useState(0)
-  const [penalDjm, penalDjmSet] = useState(0)
-  const [penalRival, penalRivalSet] = useState(0)
+  const [amarillas, amarillasSet] = useState<Record<string, number>>({})
+  const [expulsados, expulsadosSet] = useState<Record<string, true>>({})
+  const [expulsadosDjm, expulsadosDjmSet] = useState(0)
+  const [expulsadosRival, expulsadosRivalSet] = useState(0)
   const [contribuciones, contribucionesSet] = useState<Record<string, number>>({})
 
   const eventos = useMemo(() => (equipo && rival ? generarEventos(equipo.media, rival.poder) : []), [equipo, rival])
@@ -128,7 +141,12 @@ export function Partido({ onVolver, onFin }: Props) {
   const slots = FORMACIONES[equipo.formacion] ?? []
 
   const portero = titulares[0] ? jugadorPorId(titulares[0]) : undefined
-  const indicesConJugador = titulares.map((id, i) => (id ? i : -1)).filter((i) => i >= 0)
+  // Jugadores de campo (arquero afuera: no hay forma de reemplazarlo en cancha) sin
+  // contar a los ya expulsados: es el pozo del que salen protagonistas de ataque,
+  // pase, tarjeta y lesión.
+  const indicesOutfieldDisponibles = titulares
+    .map((id, i) => (id && i > 0 && !expulsados[id] ? i : -1))
+    .filter((i) => i >= 0)
 
   // Un solo protagonista por evento, elegido cuando el evento aparece (no en cada
   // render): si se recalculara siempre, el reloj animándose de fondo lo cambiaría
@@ -138,28 +156,57 @@ export function Partido({ onVolver, onFin }: Props) {
     if (evento.tipo === 'defensa') return portero
     if (evento.equipo !== 'djm') return undefined
     if (evento.tipo === 'ataque') {
-      const posibles = titulares
-        .slice(1)
-        .filter((id): id is string => !!id)
-        .map((id) => jugadorPorId(id))
-        .filter((j): j is Jugador => !!j)
+      const posibles = indicesOutfieldDisponibles.map((i) => jugadorPorId(titulares[i]!)).filter((j): j is Jugador => !!j)
       return posibles[Math.floor(Math.random() * Math.max(1, posibles.length))]
     }
-    // tarjeta o lesión de DJM: cualquiera de la cancha
-    const id = titulares[indicesConJugador[Math.floor(Math.random() * Math.max(1, indicesConJugador.length))] ?? 0]
-    return id ? jugadorPorId(id) : undefined
+    if (evento.tipo === 'tarjeta' || evento.tipo === 'lesion') {
+      const id = titulares[indicesOutfieldDisponibles[Math.floor(Math.random() * Math.max(1, indicesOutfieldDisponibles.length))] ?? -1]
+      return id ? jugadorPorId(id) : undefined
+    }
+    return undefined
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [indiceEvento, fase])
+
+  // Pase-gol: el que da el pase puede ser cualquiera de campo; el que define sale,
+  // si se puede, de entre quienes juegan hoy de DC/MI/MD/MC/MCO (posiciones de gol).
+  const paseDelEvento = useMemo(() => {
+    if (!evento || evento.tipo !== 'pase') return undefined
+    const enCancha = slots
+      .map((slot, i) => ({ slot, id: titulares[i] }))
+      .filter((x): x is { slot: SlotFormacion; id: string } => !!x.id && !expulsados[x.id])
+    if (enCancha.length < 2) return undefined
+
+    const candidatosGol = enCancha.filter((x) => POSICIONES_GOLEADOR.includes(x.slot.role))
+    const poolReceptor = candidatosGol.length ? candidatosGol : enCancha.filter((x) => x.slot.role !== 'ARQ')
+    if (!poolReceptor.length) return undefined
+    const receptorPick = poolReceptor[Math.floor(Math.random() * poolReceptor.length)]
+
+    const poolPasador = enCancha.filter((x) => x.slot.role !== 'ARQ' && x.id !== receptorPick.id)
+    if (!poolPasador.length) return undefined
+    const pasadorPick = poolPasador[Math.floor(Math.random() * poolPasador.length)]
+
+    const pasador = jugadorPorId(pasadorPick.id)
+    const receptor = jugadorPorId(receptorPick.id)
+    if (!pasador || !receptor) return undefined
+    return { pasador, receptor }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [indiceEvento, fase])
 
   const probabilidadDelEvento = (() => {
     if (!evento || !jugadorDelEvento) return 0.5
-    const rivalPoder = rival.poder + penalRival
+    let probabilidad: number
     if (evento.tipo === 'ataque') {
       const tir = (jugadorDelEvento.stats as StatsCampo).tir ?? jugadorDelEvento.media
-      return probabilidadEvento(tir, rivalPoder, equipo.media - penalDjm)
+      probabilidad = probabilidadEvento(tir, rival.poder, equipo.media)
+    } else {
+      const par = (jugadorDelEvento.stats as StatsArquero).par ?? jugadorDelEvento.media
+      probabilidad = probabilidadEvento(par, rival.poder, equipo.media)
     }
-    const par = (jugadorDelEvento.stats as StatsArquero).par ?? jugadorDelEvento.media
-    return probabilidadEvento(par, rivalPoder, equipo.media - penalDjm)
+    // Jugar con uno menos (propio o rival) mueve la chance de DJM un 15% para
+    // cada lado, en vez del punto de "poder" plano que se usaba antes.
+    probabilidad *= (1 - AJUSTE_POR_EXPULSION) ** expulsadosDjm
+    probabilidad *= (1 + AJUSTE_POR_EXPULSION) ** expulsadosRival
+    return clamp(probabilidad, 0.1, 0.92)
   })()
 
   // El reloj sube animado hacia el minuto del próximo evento antes de mostrar su tarjeta.
@@ -194,6 +241,14 @@ export function Partido({ onVolver, onFin }: Props) {
       golesDjmSet((g) => g + 1)
       if (jugadorDelEvento) contribucionesSet((c) => ({ ...c, [jugadorDelEvento.id]: (c[jugadorDelEvento.id] ?? 0) + 2 }))
     }
+    if (evento?.tipo === 'pase' && exito && paseDelEvento) {
+      golesDjmSet((g) => g + 1)
+      contribucionesSet((c) => ({
+        ...c,
+        [paseDelEvento.receptor.id]: (c[paseDelEvento.receptor.id] ?? 0) + 2,
+        [paseDelEvento.pasador.id]: (c[paseDelEvento.pasador.id] ?? 0) + 1,
+      }))
+    }
     if (evento?.tipo === 'defensa' && !exito) golesRivalSet((g) => g + 1)
     if (evento?.tipo === 'defensa' && exito && jugadorDelEvento) {
       contribucionesSet((c) => ({ ...c, [jugadorDelEvento.id]: (c[jugadorDelEvento.id] ?? 0) + 1 }))
@@ -204,16 +259,39 @@ export function Partido({ onVolver, onFin }: Props) {
 
   // Tarjetas y lesiones no se juegan: se muestran solas y siguen a los pocos segundos.
   useEffect(() => {
-    if (fase !== 'jugando' || !evento || evento.tipo === 'ataque' || evento.tipo === 'defensa') return
+    if (fase !== 'jugando' || !evento || (evento.tipo !== 'tarjeta' && evento.tipo !== 'lesion')) return
     if (minutoMostrado !== evento.minuto) return
 
     if (evento.tipo === 'tarjeta') {
-      const roja = Math.random() < 0.35
-      const quien = evento.equipo === 'djm' && jugadorDelEvento ? jugadorDelEvento.nombre : `un jugador de ${rival.nombre}`
-      flavorSet(`${roja ? '🟥' : '🟨'} Tarjeta ${roja ? 'roja' : 'amarilla'} para ${quien}.`)
-      if (roja) {
-        if (evento.equipo === 'djm') penalDjmSet((p) => p + PENALIZACION_ROJA)
-        else penalRivalSet((p) => p + PENALIZACION_ROJA)
+      const r = Math.random()
+      const expulsarDjm = (id: string) => {
+        expulsadosSet((e) => ({ ...e, [id]: true }))
+        expulsadosDjmSet((n) => n + 1)
+      }
+
+      if (r < PROB_ROJA_DIRECTA) {
+        if (evento.equipo === 'djm' && jugadorDelEvento) {
+          expulsarDjm(jugadorDelEvento.id)
+          flavorSet(`🟥 Roja directa para ${jugadorDelEvento.nombre}. Se va expulsado, DJM juega con uno menos.`)
+        } else {
+          expulsadosRivalSet((n) => n + 1)
+          flavorSet(`🟥 Roja directa para un jugador de ${rival.nombre}. Juegan con uno menos.`)
+        }
+      } else if (r < PROB_ROJA_DIRECTA + PROB_AMARILLA) {
+        if (evento.equipo === 'djm' && jugadorDelEvento) {
+          const totales = (amarillas[jugadorDelEvento.id] ?? 0) + 1
+          amarillasSet((a) => ({ ...a, [jugadorDelEvento.id]: totales }))
+          if (totales >= 2) {
+            expulsarDjm(jugadorDelEvento.id)
+            flavorSet(`🟥 Segunda amarilla para ${jugadorDelEvento.nombre}: ¡expulsado!`)
+          } else {
+            flavorSet(`🟨 Tarjeta amarilla para ${jugadorDelEvento.nombre}.`)
+          }
+        } else {
+          flavorSet(`🟨 Tarjeta amarilla para un jugador de ${rival.nombre}.`)
+        }
+      } else {
+        flavorSet('🟢 El árbitro deja pasar la falta, sin tarjeta.')
       }
     } else {
       if (evento.equipo === 'djm' && jugadorDelEvento) {
@@ -378,6 +456,19 @@ export function Partido({ onVolver, onFin }: Props) {
             </div>
           )}
 
+          {fase === 'jugando' && listoParaMostrar && evento!.tipo === 'pase' && paseDelEvento && !eventoActivo && (
+            <div key={indiceEvento} className="partido__chance tarjeta partido__aparece">
+              <span className="eyebrow">CHANCE DE GOL</span>
+              <p>
+                {paseDelEvento.pasador.nombre} arma la jugada para {paseDelEvento.receptor.nombre}, que queda solo
+                frente al arco.
+              </p>
+              <button type="button" className="boton-oro" onClick={() => eventoActivoSet(true)}>
+                DAR EL PASE
+              </button>
+            </div>
+          )}
+
           {fase === 'jugando' && listoParaMostrar && (evento!.tipo === 'tarjeta' || evento!.tipo === 'lesion') && flavor && (
             <div key={indiceEvento} className="partido__chance partido__chance--flavor tarjeta partido__aparece">
               <p>{flavor}</p>
@@ -391,6 +482,17 @@ export function Partido({ onVolver, onFin }: Props) {
                 jugador={jugadorDelEvento}
                 rival={rival}
                 probabilidad={probabilidadDelEvento}
+                onResuelto={resolverEvento}
+              />
+            </div>
+          )}
+
+          {fase === 'jugando' && listoParaMostrar && evento!.tipo === 'pase' && paseDelEvento && eventoActivo && (
+            <div className="partido__minijuego-caja tarjeta partido__aparece">
+              <MinijuegoPase
+                pasador={paseDelEvento.pasador}
+                receptor={paseDelEvento.receptor}
+                rival={rival}
                 onResuelto={resolverEvento}
               />
             </div>
@@ -446,6 +548,7 @@ export function Partido({ onVolver, onFin }: Props) {
                   >
                     <span className="partido__sub-num">{i + 1}</span>
                     {jugador && <Carta jugador={jugador} tamano={70} />}
+                    {jugador && expulsados[jugador.id] && <span className="partido__sub-expulsado">🟥</span>}
                     <span className="partido__sub-rol">{slot.role}</span>
                   </button>
                 )

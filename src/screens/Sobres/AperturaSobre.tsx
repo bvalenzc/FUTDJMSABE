@@ -52,7 +52,7 @@ export function AperturaSobre({ sobre, alAbrir, textoBoton = 'ABRIR SOBRE', qued
   const abrir = () => {
     if (alAbrir && !alAbrir()) return
 
-    const sacadas = abrirSobre(sobre.probs, sobre.cartas).sort((a, b) => b.media - a.media)
+    const sacadas = abrirSobre(sobre.probs, sobre.cartas, sobre.bandas).sort((a, b) => b.media - a.media)
     const yaTenia = { ...guardado.coleccion }
     const dobles: string[] = []
     sacadas.forEach((j) => {

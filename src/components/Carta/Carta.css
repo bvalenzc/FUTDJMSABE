@@ -658,6 +658,70 @@
   --footer: rgba(231, 216, 250, 0.62);
 }
 
+.carta[data-rareza='icono'] {
+  --c1: #ffffff;
+  --c2: #f5f3ed;
+  --c3: #e4dfd1;
+  --c4: #c7bfa9;
+  --c5: #9c927a;
+  --engrave: #6b6354;
+  --engrave-op: 0.26;
+  --engrave-blend: multiply;
+  --turn: rgba(107, 99, 84, 0.05);
+  --foil: 0.68;
+  --fig-body: #6b6354;
+  --fig-rim: #c9a24b;
+  --fig-rim-op: 0.34;
+  --scrim-0: rgba(156, 146, 122, 0);
+  --scrim-1: rgba(140, 130, 108, 0.36);
+  --scrim-2: rgba(92, 84, 66, 0.72);
+  --scrim-3: rgba(56, 50, 38, 0.9);
+  --scrimtop: rgba(255, 255, 255, 0.62);
+  --orn-dark: #c9a24b;
+  --orn-light: #ffffff;
+  --ink: #2b2820;
+  --ink-soft: #8c7f63;
+  --ink-glow: rgba(255, 255, 255, 0.75);
+  --name-main: #fffdf6;
+  --name-sub: rgba(255, 253, 246, 0.85);
+  --rule: rgba(201, 162, 75, 0.85);
+  --divider: rgba(201, 162, 75, 0.5);
+  --footer: rgba(201, 162, 75, 0.72);
+  --pos-color: #8c6b1e;
+  --sub-color: #8c6b1e;
+}
+
+.carta[data-rareza='8dor'] {
+  --c1: #4e7fc4;
+  --c2: #26518f;
+  --c3: #123061;
+  --c4: #0a1d3f;
+  --c5: #040d22;
+  --engrave: #e3c069;
+  --engrave-op: 0.34;
+  --engrave-blend: screen;
+  --turn: rgba(227, 192, 105, 0.05);
+  --foil: 0.34;
+  --fig-body: #040d22;
+  --fig-rim: #e3c069;
+  --fig-rim-op: 0.28;
+  --scrim-0: rgba(4, 13, 34, 0);
+  --scrim-1: rgba(4, 13, 34, 0.38);
+  --scrim-2: rgba(3, 10, 26, 0.74);
+  --scrim-3: rgba(2, 7, 18, 0.93);
+  --scrimtop: rgba(78, 127, 196, 0.35);
+  --orn-dark: #e3c069;
+  --orn-light: #8fb8ec;
+  --ink: #f1d993;
+  --ink-soft: #8fb8ec;
+  --ink-glow: rgba(4, 13, 34, 0.7);
+  --name-main: #f6e6b4;
+  --name-sub: rgba(143, 184, 236, 0.92);
+  --rule: rgba(227, 192, 105, 0.85);
+  --divider: rgba(227, 192, 105, 0.5);
+  --footer: rgba(227, 192, 105, 0.7);
+}
+
 /* --- capa extra: DON JULIO D'OR --- */
 
 .carta__djd-oro {
@@ -846,6 +910,33 @@
 
 .carta__fp-lavanda-f {
   fill: #e7d8fa;
+  stroke: none;
+}
+
+/* --- capa extra: ICONO OJALÁ (mármol dorado/gris) --- */
+
+.carta__icon-oro {
+  stroke: #c9a24b;
+}
+.carta__icon-gris {
+  stroke: #8c8578;
+}
+.carta__icon-oro-f {
+  fill: #c9a24b;
+  stroke: none;
+}
+.carta__icon-gris-f {
+  fill: #8c8578;
+  stroke: none;
+}
+
+/* --- capa extra: JUGADOR 8 D'OR (acentos rojos sobre el Don Julio D'Or) --- */
+
+.carta__j8-rojo {
+  stroke: #d8503e;
+}
+.carta__j8-rojo-f {
+  fill: #d8503e;
   stroke: none;
 }
 

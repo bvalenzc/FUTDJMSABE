@@ -17,54 +17,173 @@
   color: var(--texto-medio);
 }
 
-.sbc__lista {
+/* ---------- lista de grupos de SBC ---------- */
+
+.sbc__grupos {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   padding: 14px;
 }
 
-.sbc__plantilla {
+.sbc-grupo {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 14px;
+  gap: 14px;
+  padding: 14px 16px;
   border: none;
-  border-radius: 4px;
+  border-radius: 10px;
   text-align: left;
-  background: linear-gradient(150deg, #201c15, #121009);
-  box-shadow: inset 0 0 0 1px var(--superficie);
+  overflow: hidden;
+  background: linear-gradient(135deg, #241a3d 0%, #171128 55%, #100c1c 100%);
+  box-shadow: inset 0 0 0 1px rgba(143, 120, 230, 0.35), 0 10px 22px -12px rgba(0, 0, 0, 0.7);
   cursor: pointer;
 }
 
-.sbc__plantilla h3 {
+.sbc-grupo::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #6fd8ff, #b98bff);
+}
+
+.sbc-grupo__texto h3 {
   margin: 0 0 4px;
+  font-family: 'Anton', sans-serif;
   font-size: 15px;
-  font-weight: 800;
+  letter-spacing: 0.4px;
   color: var(--texto);
 }
 
-.sbc__plantilla p {
-  margin: 0;
-  font-size: 12px;
+.sbc-grupo__texto p {
+  margin: 0 0 6px;
+  max-width: 210px;
+  font-size: 11.5px;
+  line-height: 1.4;
   color: var(--texto-medio);
 }
 
-.sbc__plantilla span {
+.sbc-grupo__progreso {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #8fb8ec;
+}
+
+.sbc-grupo__premio {
   flex-shrink: 0;
-  font-size: 13px;
-  font-weight: 800;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.sbc-grupo__premio strong {
+  font-family: 'Anton', sans-serif;
+  font-size: 12px;
   color: var(--oro-claro);
 }
 
-.sbc__plantilla--hecha {
+.sbc-grupo--hecho {
   opacity: 0.5;
   cursor: default;
 }
 
-.sbc__plantilla--hecha span {
+.sbc-grupo--hecho .sbc-grupo__progreso {
   color: #7fd08a;
+}
+
+/* ---------- grilla de plantillas dentro de un grupo ---------- */
+
+.sbc__reclamo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 14px;
+  padding: 18px;
+}
+
+.sbc__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 4px 14px 14px;
+}
+
+.sbc-plantilla {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  text-align: left;
+  background: linear-gradient(160deg, #201c15, #121009);
+  box-shadow: inset 0 0 0 1px var(--superficie);
+  cursor: pointer;
+}
+
+.sbc-plantilla__dificultad {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--oro-claro);
+}
+
+.sbc-plantilla h4 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.25;
+  color: var(--texto);
+}
+
+.sbc-plantilla__premios {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sbc-plantilla__premios em {
+  font-style: normal;
+  font-size: 10px;
+  color: var(--texto-tenue);
+}
+
+.sbc-plantilla__premios span {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--oro-claro);
+}
+
+.sbc-plantilla--hecha {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.sbc-plantilla__check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #3fae5c;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
 }
 
 .sbc__intro {
@@ -203,4 +322,108 @@
   margin: 0;
   font-size: 13px;
   color: var(--texto-medio);
+}
+
+.sbc__quitar {
+  display: block;
+  width: 100%;
+  margin-top: 14px;
+  padding: 10px;
+  border: 1px solid var(--borde);
+  border-radius: var(--r-chico);
+  background: none;
+  color: var(--texto-medio);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ---------- plantilla con formación: reutiliza la cancha del FUTDRAFT ---------- */
+
+.sbc__cancha {
+  margin-top: 4px;
+}
+
+/* REQUISITOS ocupa el lugar de SUBS, pero un poco más ancha para que entre la palabra. */
+.sbc__lengueta-requisitos {
+  padding-left: 16px;
+  padding-right: 16px;
+  letter-spacing: 0.5px;
+}
+
+/* SEND VELIZ: misma pestaña que REQUISITOS, en la esquina opuesta, y solo
+   aparece cuando ya se puede confirmar la plantilla. */
+.sbc__lengueta-enviar {
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 4;
+  padding: 6px 14px;
+  border: 1px solid var(--borde);
+  border-right: none;
+  border-top: none;
+  border-radius: 0 0 0 var(--r-medio);
+  background: linear-gradient(180deg, var(--oro-claro), var(--oro));
+  color: #1c1600;
+  font-family: 'Anton', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.6px;
+  cursor: pointer;
+  animation: sbc-enviar-aparece 0.25s ease;
+}
+
+@keyframes sbc-enviar-aparece {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Panel de REQUISITOS: mismo mecanismo deslizable que el banco de suplentes,
+   pero como lista vertical de chequeo en vez de una fila de cartas. */
+.sbc__panel-requisitos {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  max-height: 55%;
+  padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+  overflow-y: auto;
+}
+
+.sbc__requisito-fila {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--texto-medio);
+}
+
+.sbc__requisito-circulo {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.sbc__requisito-circulo--ok {
+  border-color: #3fae5c;
+  background: #3fae5c;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sbc__lengueta-enviar {
+    animation: none;
+  }
 }

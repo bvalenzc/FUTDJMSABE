@@ -35,4 +35,6 @@ export const COLOR_RAREZA: Record<Rareza, string> = {
   parche: '#e0563f',
   'parche-oro': '#e8b44a',
   fairplay: '#9862d8',
+  icono: '#c9a24b',
+  '8dor': '#d8503e',
 }

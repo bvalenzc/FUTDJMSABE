@@ -1,5 +1,7 @@
 /** Reglas del juego, portadas del FUTDJM original. Todo lo ajustable vive acá. */
 
+import type { Rareza } from '../types/jugador'
+
 export type SlotFormacion = { role: string; x: number; y: number }
 
 export const FORMACIONES: Record<string, SlotFormacion[]> = {
@@ -112,10 +114,22 @@ export type Sobre = {
   id: string
   nombre: string
   precio: number
-  tema: 'mono' | 'bronce' | 'verde' | 'purpura' | 'azul' | 'oro'
+  tema: 'mono' | 'bronce' | 'verde' | 'purpura' | 'azul' | 'oro' | 'noche'
   cartas: number
   probs: number[]
+  /** Bandas de media propias del sobre; si falta, usa las BANDAS_MEDIA globales. */
+  bandas?: BandaMedia[]
 }
+
+/** Bandas exclusivas del SE ME FUE LARGA PACK: van más finas arriba que las globales. */
+export const BANDAS_SE_ME_FUE_LARGA: BandaMedia[] = [
+  { min: 74, max: 80 },
+  { min: 81, max: 85 },
+  { min: 86, max: 89 },
+  { min: 90, max: 93 },
+  { min: 94, max: 97 },
+  { min: 98, max: 99 },
+]
 
 /** Cartas por sobre, igual en todos. */
 export const CARTAS_POR_SOBRE = 3
@@ -137,6 +151,15 @@ export const CATALOGO_SOBRES: Sobre[] = [
   { id: 'consu', nombre: 'CONSU BECERRA PACK', precio: 7000, tema: 'purpura', cartas: CARTAS_POR_SOBRE, probs: [0.5, 0.3, 0.15, 0.04, 0.01] },
   { id: 'veliz', nombre: 'VELIZ PACK', precio: 15000, tema: 'azul', cartas: CARTAS_POR_SOBRE, probs: [0.3, 0.25, 0.2, 0.15, 0.1] },
   { id: 'djm', nombre: 'DJM PACK', precio: 30000, tema: 'oro', cartas: CARTAS_POR_SOBRE, probs: [0.1, 0.15, 0.3, 0.25, 0.2] },
+  {
+    id: 'seme_fue_larga',
+    nombre: 'SE ME FUE LARGA PACK',
+    precio: 150000,
+    tema: 'noche',
+    cartas: CARTAS_POR_SOBRE,
+    probs: [0.0005, 0.1495, 0.2, 0.3, 0.25, 0.1],
+    bandas: BANDAS_SE_ME_FUE_LARGA,
+  },
 ]
 
 export function sobrePorId(id: string): Sobre | undefined {
@@ -147,17 +170,30 @@ export function sobrePorId(id: string): Sobre | undefined {
 /* ================= SBCs ================= */
 
 export type RequisitoSbc = {
-  /** id del jugador exigido; si falta, cualquiera que cumpla la media */
+  /** id del jugador exigido; si falta, cualquiera que cumpla el resto */
   jugadorId?: string
   mediaMinima?: number
+  /** posición del slot; en una plantilla con `formacion` se toma sola del slot y esto es solo para forzarla. */
   posicion?: string
 }
+
+/** Requisito que no mira un slot individual sino el conjunto completo de cartas elegidas. */
+export type RequisitoAgregado =
+  | { tipo: 'cantidadMinima'; minimo: number }
+  | { tipo: 'mediaPromedio'; minimo: number }
+  /** Solo se puede usar cartas de estas personas (por `persona`, cualquier rareza de esa persona sirve). */
+  | { tipo: 'soloPersonas'; personas: string[] }
+  | { tipo: 'cantidadRareza'; rareza: Rareza; minimo: number }
 
 export type PlantillaSbc = {
   id: string
   nombre: string
   dificultad: 'Fácil' | 'Media' | 'Media-Alta' | 'Alta'
+  /** Si viene, la plantilla se arma sobre la cancha de esa formación (un slot por posición)
+   *  en vez de la fila genérica de requisitos sueltos. */
+  formacion?: string
   requisitos: RequisitoSbc[]
+  requisitosAgregados?: RequisitoAgregado[]
   recompensaSobres: { sobreId: string; cantidad: number }[]
   recompensaMonedas: number
 }
@@ -169,6 +205,8 @@ export type Sbc = {
   plantillas: PlantillaSbc[]
   recompensaSobres: { sobreId: string; cantidad: number }[]
   recompensaMonedas: number
+  /** Carta exclusiva que se entrega junto con la recompensa final del SBC, si tiene. */
+  cartaEspecialId?: string
 }
 
 export const CATALOGO_SBC: Sbc[] = [
@@ -210,6 +248,37 @@ export const CATALOGO_SBC: Sbc[] = [
         requisitos: [{ mediaMinima: 90 }, { mediaMinima: 84 }, { mediaMinima: 84 }, { mediaMinima: 82 }],
         recompensaSobres: [{ sobreId: 'veliz', cantidad: 3 }],
         recompensaMonedas: 15000,
+      },
+    ],
+  },
+  {
+    id: 'el_gato',
+    nombre: 'EL GATO',
+    descripcion: 'Completá las plantillas de esta serie y llevate la carta ICONO OJALÁ de GARIN.',
+    recompensaSobres: [
+      { sobreId: 'djm', cantidad: 3 },
+      { sobreId: 'veliz', cantidad: 3 },
+    ],
+    recompensaMonedas: 1000000,
+    cartaEspecialId: 'garin',
+    plantillas: [
+      {
+        id: 'gen_2022_cumbres',
+        nombre: 'GEN 2022 CUMBRES',
+        dificultad: 'Alta',
+        formacion: '1-3-2-1',
+        requisitos: [{}, {}, {}, {}, {}, {}, {}],
+        requisitosAgregados: [
+          { tipo: 'cantidadMinima', minimo: 7 },
+          { tipo: 'mediaPromedio', minimo: 90 },
+          {
+            tipo: 'soloPersonas',
+            personas: ['TABACH', 'PELAO', 'COSTAS', 'MAU', 'CHELO', 'MRILLON', 'PANCHO', 'BAÑADOS', 'RAFA', 'VANTI'],
+          },
+          { tipo: 'cantidadRareza', rareza: 'djdor', minimo: 2 },
+        ],
+        recompensaSobres: [{ sobreId: 'seme_fue_larga', cantidad: 1 }],
+        recompensaMonedas: 100000,
       },
     ],
   },

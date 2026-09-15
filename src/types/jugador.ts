@@ -52,6 +52,8 @@ export type Jugador = {
   rareza?: Rareza
   /** true para las cartas creadas desde el panel de admin */
   propia?: boolean
+  /** true si la carta es exclusiva de una recompensa (SBC, etc.) y nunca puede salir en un sobre */
+  soloEspecial?: boolean
 }
 
 export type Rareza =
@@ -65,6 +67,8 @@ export type Rareza =
   | 'parche'
   | 'parche-oro'
   | 'fairplay'
+  | 'icono'
+  | '8dor'
 
 export const RAREZAS: { id: Rareza; nombre: string }[] = [
   { id: 'plata', nombre: 'Plata' },
@@ -77,4 +81,6 @@ export const RAREZAS: { id: Rareza; nombre: string }[] = [
   { id: 'parche', nombre: 'Parche' },
   { id: 'parche-oro', nombre: 'Parche de Oro' },
   { id: 'fairplay', nombre: 'Fairplay' },
+  { id: 'icono', nombre: 'Icono Ojalá' },
+  { id: '8dor', nombre: "Jugador 8 D'Or" },
 ]

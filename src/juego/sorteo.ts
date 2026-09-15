@@ -1,6 +1,12 @@
 import type { Jugador } from '../types/jugador'
-import { BANDAS_MEDIA, FORMACIONES, FORMACIONES_POR_DRAFT, OPCIONES_POR_SLOT } from '../config/juego'
+import { BANDAS_MEDIA, FORMACIONES, FORMACIONES_POR_DRAFT, OPCIONES_POR_SLOT, type BandaMedia } from '../config/juego'
 import { obtenerRoster, personaDe, posicionesDe } from './roster'
+
+/** Roster que puede salir de un sobre: las cartas `soloEspecial` (recompensas
+ *  exclusivas de SBC, etc.) nunca entran al sorteo de packs. */
+function rosterDeSobres(): Jugador[] {
+  return obtenerRoster().filter((j) => !j.soloEspecial)
+}
 
 function mezclar<T>(lista: T[]): T[] {
   const copia = [...lista]
@@ -95,8 +101,9 @@ export function candidatosCapitan(formacion: string): Jugador[] {
   return eleccionPorNivel(elegibles.length ? elegibles : disponibles, OPCIONES_POR_SLOT)
 }
 
-/** Elige una carta de un sobre según las probabilidades por banda de media. */
-export function cartaDeSobre(probs: number[]): Jugador {
+/** Elige una carta de un sobre según las probabilidades por banda de media.
+ *  `bandas` por defecto son las globales; un sobre puede traer las suyas propias. */
+export function cartaDeSobre(probs: number[], bandas: BandaMedia[] = BANDAS_MEDIA): Jugador {
   const r = Math.random()
   let acumulado = 0
   let banda = probs.length - 1
@@ -107,14 +114,14 @@ export function cartaDeSobre(probs: number[]): Jugador {
       break
     }
   }
-  for (let salto = 0; salto < BANDAS_MEDIA.length; salto++) {
-    for (const i of [banda - salto, banda + salto].filter((x) => x >= 0 && x < BANDAS_MEDIA.length)) {
-      const { min, max } = BANDAS_MEDIA[i]
-      const candidatos = obtenerRoster().filter((j) => j.media >= min && j.media <= max)
+  for (let salto = 0; salto < bandas.length; salto++) {
+    for (const i of [banda - salto, banda + salto].filter((x) => x >= 0 && x < bandas.length)) {
+      const { min, max } = bandas[i]
+      const candidatos = rosterDeSobres().filter((j) => j.media >= min && j.media <= max)
       if (candidatos.length) return candidatos[Math.floor(Math.random() * candidatos.length)]
     }
   }
-  const todos = obtenerRoster()
+  const todos = rosterDeSobres()
   return todos[Math.floor(Math.random() * todos.length)]
 }
 
@@ -123,7 +130,7 @@ export function cartaDeSobre(probs: number[]): Jugador {
  * alguien, se vuelve a tirar; si aun así no aparece nadie nuevo, se completa
  * con la carta más cercana en media de una persona que falte.
  */
-export function abrirSobre(probs: number[], cartas: number): Jugador[] {
+export function abrirSobre(probs: number[], cartas: number, bandas?: BandaMedia[]): Jugador[] {
   const salida: Jugador[] = []
   const personas = new Set<string>()
 
@@ -131,13 +138,13 @@ export function abrirSobre(probs: number[], cartas: number): Jugador[] {
     let elegida: Jugador | null = null
 
     for (let intento = 0; intento < 30 && !elegida; intento++) {
-      const candidata = cartaDeSobre(probs)
+      const candidata = cartaDeSobre(probs, bandas)
       if (!personas.has(personaDe(candidata))) elegida = candidata
     }
 
     if (!elegida) {
       const referencia = salida.length ? salida[salida.length - 1].media : 80
-      const libres = obtenerRoster().filter((j) => !personas.has(personaDe(j)))
+      const libres = rosterDeSobres().filter((j) => !personas.has(personaDe(j)))
       if (!libres.length) break
       elegida = libres.sort((a, b) => Math.abs(a.media - referencia) - Math.abs(b.media - referencia))[0]
     }

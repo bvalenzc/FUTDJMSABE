@@ -586,5 +586,48 @@
       "fis": 94
     },
     "foto": "vanti"
+  },
+  {
+    "id": "mau-8dor",
+    "nombre": "MAU",
+    "persona": "MAU",
+    "posicion": "MC",
+    "posiciones": [
+      "MC",
+      "DC",
+      "DFC"
+    ],
+    "tipo": "plantel",
+    "tipoStats": "campo",
+    "media": 92,
+    "rareza": "8dor",
+    "stats": {
+      "rit": 80,
+      "tir": 88,
+      "pas": 94,
+      "reg": 85,
+      "def": 87,
+      "fis": 92
+    },
+    "foto": "mau"
+  },
+  {
+    "id": "garin",
+    "nombre": "GARIN",
+    "persona": "GARIN",
+    "posicion": "DC",
+    "tipo": "plantel",
+    "tipoStats": "campo",
+    "media": 93,
+    "rareza": "icono",
+    "soloEspecial": true,
+    "stats": {
+      "rit": 90,
+      "tir": 99,
+      "pas": 83,
+      "reg": 85,
+      "def": 87,
+      "fis": 94
+    }
   }
 ]

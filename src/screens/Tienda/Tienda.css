@@ -87,6 +87,16 @@
   --sobre-2: #2a1e08;
   color: #2b1b04;
 }
+.sobre-item--noche {
+  --sobre-1: #e3c56a;
+  --sobre-2: #030509;
+}
+.sobre-item--noche .sobre-item__arte {
+  border-color: rgba(227, 197, 106, 0.7);
+  box-shadow:
+    0 0 16px rgba(212, 175, 90, 0.5),
+    0 8px 16px rgba(0, 0, 0, 0.5);
+}
 
 .sobre-item__cartas {
   position: relative;

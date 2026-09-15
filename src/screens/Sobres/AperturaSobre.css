@@ -142,6 +142,21 @@
   --sa4: #2a1e08;
   --sa-tinta: #2b1b04;
 }
+/* El pack más caro: azul noche bien oscuro con detalles dorados, para que
+   resalte por sobre el resto de la tienda. */
+.sobre-arte--noche {
+  --sa1: #e3c56a;
+  --sa2: #1c2b52;
+  --sa3: #0d1730;
+  --sa4: #030509;
+  --sa-tinta: #f3e3ad;
+  border-color: rgba(227, 197, 106, 0.85);
+  box-shadow:
+    0 26px 48px -16px rgba(0, 0, 0, 0.8),
+    0 0 34px rgba(212, 175, 90, 0.4),
+    inset 0 2px 0 rgba(255, 226, 150, 0.55),
+    inset 0 -34px 44px rgba(0, 0, 0, 0.4);
+}
 
 .sobre-arte__trama {
   position: absolute;

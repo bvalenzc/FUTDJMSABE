@@ -13,6 +13,8 @@ import { CapaDjdor } from './CapaDjdor'
 import { CapaFlashback } from './CapaFlashback'
 import { CapaParcheOro } from './CapaParcheOro'
 import { CapaFairplay } from './CapaFairplay'
+import { CapaIcono } from './CapaIcono'
+import { Capa8Dor } from './Capa8Dor'
 import './Carta.css'
 
 const ANCHO_BASE = 330
@@ -80,6 +82,8 @@ export function Carta({ jugador, tamano = ANCHO_BASE, interactivo = false, class
         {rareza === 'djdor' && <CapaDjdor />}
         {rareza === 'parche-oro' && <CapaParcheOro />}
         {rareza === 'fairplay' && <CapaFairplay />}
+        {rareza === 'icono' && <CapaIcono />}
+        {rareza === '8dor' && <Capa8Dor />}
 
         {alternativas.length > 0 && (
           <div className="carta__alternativas">
