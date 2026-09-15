@@ -15,8 +15,9 @@ function laurel(cx: number, cy: number, r: number) {
 
 const HOJAS = laurel(165, 152, 112)
 
-/** Capa extra de JUGADOR 8 D'OR: la misma base que Don Julio D'Or, con acentos
- *  rojos (galón superior y puntas) que la distinguen a simple vista. */
+/** Capa extra de JUGADOR 8 D'OR: mismo guilloché dorado que Don Julio D'Or,
+ *  pero con los acentos en rojo (no azul) para que combinen con su fondo
+ *  granate y se note de entrada que es una rareza distinta. */
 export function Capa8Dor() {
   return (
     <svg className="carta__capa-fg" viewBox="0 0 330 486" xmlns="http://www.w3.org/2000/svg">
@@ -38,7 +39,7 @@ export function Capa8Dor() {
         <circle cx="165" cy="152" r="127" strokeWidth="0.4" opacity="0.6" />
       </g>
 
-      <g className="carta__djd-azul" fill="none" strokeWidth="0.8" opacity="0.5">
+      <g className="carta__j8-rojo" fill="none" strokeWidth="0.8" opacity="0.5">
         <path d="M22 120 C42 150 42 200 22 230" />
         <path d="M308 120 C288 150 288 200 308 230" />
       </g>
@@ -53,16 +54,17 @@ export function Capa8Dor() {
         <circle cx="308" cy="278" r="2.6" />
       </g>
 
-      {/* acentos rojos "8 D'Or" que diferencian de Don Julio D'Or */}
-      <g className="carta__j8-rojo" fill="none" strokeWidth="1" opacity="0.75">
+      {/* galón rojo superior, la firma visual de "8 D'Or" */}
+      <g className="carta__j8-rojo" fill="none" strokeWidth="1.4" opacity="0.85">
         <path d="M132 40 C148 30 182 30 198 40" />
+        <path d="M140 46 C153 39 177 39 190 46" opacity="0.6" />
       </g>
-      <g className="carta__j8-rojo-f" opacity="0.85">
-        <circle cx="165" cy="33" r="2.6" />
+      <g className="carta__j8-rojo-f" opacity="0.9">
+        <circle cx="165" cy="33" r="3" />
         <circle cx="41" cy="36" r="1.6" />
         <circle cx="289" cy="36" r="1.6" />
       </g>
-      <g className="carta__j8-rojo" fill="none" strokeWidth="1" strokeDasharray="1 3" opacity="0.55">
+      <g className="carta__j8-rojo" fill="none" strokeWidth="1" strokeDasharray="1 3" opacity="0.6">
         <path d="M22 230 C34 240 34 250 22 258" />
         <path d="M308 230 C296 240 296 250 308 258" />
       </g>

@@ -1,6 +1,6 @@
 /** Reglas del juego, portadas del FUTDJM original. Todo lo ajustable vive acá. */
 
-import type { Rareza } from '../types/jugador'
+import type { Rareza, TipoStats } from '../types/jugador'
 
 export type SlotFormacion = { role: string; x: number; y: number }
 
@@ -180,15 +180,22 @@ export type RequisitoSbc = {
 /** Requisito que no mira un slot individual sino el conjunto completo de cartas elegidas. */
 export type RequisitoAgregado =
   | { tipo: 'cantidadMinima'; minimo: number }
+  | { tipo: 'cantidadMaxima'; maximo: number }
   | { tipo: 'mediaPromedio'; minimo: number }
   /** Solo se puede usar cartas de estas personas (por `persona`, cualquier rareza de esa persona sirve). */
   | { tipo: 'soloPersonas'; personas: string[] }
   | { tipo: 'cantidadRareza'; rareza: Rareza; minimo: number }
+  /** Química mínima de la plantilla armada sobre su formación. */
+  | { tipo: 'quimicaMinima'; minimo: number }
+  /** Mínimo de cartas de un tipo de stats (para pedir arqueros de más, por ejemplo). */
+  | { tipo: 'cantidadTipoStats'; tipoStats: TipoStats; minimo: number }
+  /** Tiene que estar cada una de estas personas, cada una con su propia media mínima si tiene. */
+  | { tipo: 'incluyePersonas'; personas: { persona: string; mediaMinima?: number }[] }
 
 export type PlantillaSbc = {
   id: string
   nombre: string
-  dificultad: 'Fácil' | 'Media' | 'Media-Alta' | 'Alta'
+  dificultad: string
   /** Si viene, la plantilla se arma sobre la cancha de esa formación (un slot por posición)
    *  en vez de la fila genérica de requisitos sueltos. */
   formacion?: string
@@ -265,7 +272,7 @@ export const CATALOGO_SBC: Sbc[] = [
       {
         id: 'gen_2022_cumbres',
         nombre: 'GEN 2022 CUMBRES',
-        dificultad: 'Alta',
+        dificultad: 'Media',
         formacion: '1-3-2-1',
         requisitos: [{}, {}, {}, {}, {}, {}, {}],
         requisitosAgregados: [
@@ -279,6 +286,104 @@ export const CATALOGO_SBC: Sbc[] = [
         ],
         recompensaSobres: [{ sobreId: 'seme_fue_larga', cantidad: 1 }],
         recompensaMonedas: 100000,
+      },
+      {
+        id: 'yo_siempre_lo_he_dicho',
+        nombre: 'YO SIEMPRE LO HE DICHO...',
+        dificultad: 'Media',
+        formacion: '1-2-3-1',
+        requisitos: [{}, {}, {}, {}, {}, {}, {}],
+        requisitosAgregados: [
+          { tipo: 'cantidadMaxima', maximo: 1 },
+          { tipo: 'incluyePersonas', personas: [{ persona: 'BAÑADOS' }] },
+          { tipo: 'mediaPromedio', minimo: 97 },
+        ],
+        recompensaSobres: [{ sobreId: 'euforia', cantidad: 3 }],
+        recompensaMonedas: 30000,
+      },
+      {
+        id: 'fen',
+        nombre: 'FEN',
+        dificultad: 'Baja',
+        formacion: '1-3-1-2',
+        requisitos: [{}, {}, {}, {}, {}, {}, {}],
+        requisitosAgregados: [
+          {
+            tipo: 'incluyePersonas',
+            personas: [{ persona: 'RAI' }, { persona: 'VANTI', mediaMinima: 95 }],
+          },
+        ],
+        recompensaSobres: [{ sobreId: 'consu', cantidad: 2 }],
+        recompensaMonedas: 20000,
+      },
+      {
+        id: 'el_ipad',
+        nombre: 'EL IPAD',
+        dificultad: 'Media',
+        formacion: '1-2-3-1',
+        requisitos: [{}, {}, {}, {}, {}, {}, {}],
+        requisitosAgregados: [
+          { tipo: 'cantidadMaxima', maximo: 5 },
+          { tipo: 'cantidadTipoStats', tipoStats: 'arquero', minimo: 5 },
+          { tipo: 'mediaPromedio', minimo: 83 },
+        ],
+        recompensaSobres: [{ sobreId: 'consu', cantidad: 3 }],
+        recompensaMonedas: 25000,
+      },
+      {
+        id: 'mondaca_hijodeputa',
+        nombre: 'MONDACA HIJODEPUTA',
+        dificultad: 'Muy difícil',
+        formacion: '1-3-2-1',
+        requisitos: [{}, {}, {}, {}, {}, {}, {}],
+        requisitosAgregados: [
+          { tipo: 'mediaPromedio', minimo: 95 },
+          { tipo: 'cantidadRareza', rareza: 'djdor', minimo: 7 },
+          { tipo: 'quimicaMinima', minimo: 70 },
+        ],
+        recompensaSobres: [{ sobreId: 'seme_fue_larga', cantidad: 2 }],
+        recompensaMonedas: 200000,
+      },
+      {
+        id: 'everest',
+        nombre: 'EVEREST',
+        dificultad: 'Media-difícil',
+        formacion: '1-2-2-2',
+        requisitos: [{}, {}, {}, {}, {}, {}, {}],
+        requisitosAgregados: [
+          {
+            tipo: 'incluyePersonas',
+            personas: [
+              { persona: 'VALENZ', mediaMinima: 95 },
+              { persona: 'LUCHO', mediaMinima: 92 },
+              { persona: 'MANGO' },
+              { persona: 'TITO' },
+              { persona: 'VARELA' },
+              { persona: 'MVALENZ', mediaMinima: 85 },
+              { persona: 'PUENTE' },
+            ],
+          },
+          { tipo: 'quimicaMinima', minimo: 70 },
+        ],
+        recompensaSobres: [
+          { sobreId: 'djm', cantidad: 2 },
+          { sobreId: 'consu', cantidad: 2 },
+        ],
+        recompensaMonedas: 70000,
+      },
+      {
+        id: 'santuario_del_valle',
+        nombre: 'SANTUARIO DEL VALLE',
+        dificultad: 'Fácil',
+        formacion: '1-2-3-1',
+        requisitos: [{}, {}, {}, {}, {}, {}, {}],
+        requisitosAgregados: [
+          { tipo: 'incluyePersonas', personas: [{ persona: 'MAU' }, { persona: 'TITO' }] },
+          { tipo: 'cantidadMaxima', maximo: 2 },
+          { tipo: 'quimicaMinima', minimo: 20 },
+        ],
+        recompensaSobres: [{ sobreId: 'nuende', cantidad: 5 }],
+        recompensaMonedas: 20000,
       },
     ],
   },

@@ -10,6 +10,7 @@ import {
   type SlotFormacion,
 } from '../../config/juego'
 import { calcularRareza } from '../../config/rareza'
+import { quimicaTotal } from '../../juego/quimica'
 import { jugadorPorId, personaDe, posicionesDe } from '../../juego/roster'
 import { useJuego } from '../../juego/useJuego'
 import { Carta } from '../../components/Carta/Carta'
@@ -27,11 +28,8 @@ function posicionEnCancha(slot: SlotFormacion) {
   return { x: 9 + slot.x * 0.82, y: 5 + slot.y * 0.92 }
 }
 
-function soloPersonasDe(plantilla: PlantillaSbc): string[] | null {
-  const req = plantilla.requisitosAgregados?.find((r) => r.tipo === 'soloPersonas')
-  return req && req.tipo === 'soloPersonas' ? req.personas : null
-}
-
+/** Valida un slot ya lleno contra su propio requisito (jugador/media/posición puntual).
+ *  No filtra el selector: eso ahora lo hace solo la posición, ver `candidatos`. */
 function cumpleSlot(jugador: Jugador, plantilla: PlantillaSbc, indice: number): boolean {
   const requisito: RequisitoSbc = plantilla.requisitos[indice] ?? {}
   if (requisito.jugadorId && jugador.id !== requisito.jugadorId) return false
@@ -39,30 +37,50 @@ function cumpleSlot(jugador: Jugador, plantilla: PlantillaSbc, indice: number): 
   const rolFormacion = plantilla.formacion ? FORMACIONES[plantilla.formacion]?.[indice]?.role : undefined
   const posicionExigida = requisito.posicion ?? rolFormacion
   if (posicionExigida && !posicionesDe(jugador).includes(posicionExigida)) return false
-  const soloPersonas = soloPersonasDe(plantilla)
-  if (soloPersonas && !soloPersonas.includes(personaDe(jugador))) return false
   return true
 }
 
-function cumpleAgregado(req: RequisitoAgregado, jugadores: Jugador[]): boolean {
+function cumpleAgregado(
+  req: RequisitoAgregado,
+  jugadores: Jugador[],
+  slots: SlotFormacion[],
+  asignados: (string | null)[],
+): boolean {
   if (req.tipo === 'cantidadMinima') return jugadores.length >= req.minimo
+  if (req.tipo === 'cantidadMaxima') return jugadores.length <= req.maximo
   if (req.tipo === 'mediaPromedio') {
     if (!jugadores.length) return false
     return jugadores.reduce((s, j) => s + j.media, 0) / jugadores.length >= req.minimo
   }
   if (req.tipo === 'soloPersonas') return jugadores.length > 0 && jugadores.every((j) => req.personas.includes(personaDe(j)))
   if (req.tipo === 'cantidadRareza') return jugadores.filter((j) => calcularRareza(j) === req.rareza).length >= req.minimo
+  if (req.tipo === 'cantidadTipoStats') return jugadores.filter((j) => j.tipoStats === req.tipoStats).length >= req.minimo
+  if (req.tipo === 'incluyePersonas') {
+    return req.personas.every(
+      ({ persona, mediaMinima }) => jugadores.some((j) => personaDe(j) === persona && j.media >= (mediaMinima ?? 0)),
+    )
+  }
+  if (req.tipo === 'quimicaMinima') return quimicaTotal(asignados, slots) >= req.minimo
   return true
 }
 
 function textoAgregado(req: RequisitoAgregado): string {
   if (req.tipo === 'cantidadMinima') return `Mínimo ${req.minimo} jugadores`
+  if (req.tipo === 'cantidadMaxima') return `Máximo ${req.maximo} jugadores`
   if (req.tipo === 'mediaPromedio') return `Media general +${req.minimo}`
   if (req.tipo === 'soloPersonas') return `Solo cartas de: ${req.personas.join(', ')}`
   if (req.tipo === 'cantidadRareza') {
     const nombre = RAREZAS.find((r) => r.id === req.rareza)?.nombre ?? req.rareza
     return `Mínimo ${req.minimo} cartas ${nombre}`
   }
+  if (req.tipo === 'cantidadTipoStats') {
+    const etiqueta = req.tipoStats === 'arquero' ? 'arqueros' : 'jugadores de campo'
+    return `Mínimo ${req.minimo} ${etiqueta}`
+  }
+  if (req.tipo === 'incluyePersonas') {
+    return `Tiene que estar: ${req.personas.map((p) => (p.mediaMinima ? `${p.persona} +${p.mediaMinima}` : p.persona)).join(', ')}`
+  }
+  if (req.tipo === 'quimicaMinima') return `Química mínima ${req.minimo}`
   return ''
 }
 
@@ -102,15 +120,28 @@ export function Sbc({ onVolver }: Props) {
     eligiendoSet(null)
   }
 
+  const slots = plantillaActiva?.formacion ? FORMACIONES[plantillaActiva.formacion] ?? [] : []
+
+  // El selector muestra TODAS las repetidas que puedan jugar en ese puesto: los
+  // requisitos de jugador/media/lista blanca ya no filtran acá, solo se validan
+  // al completar (ver `cumpleSlot`/`cumpleAgregado`). Tampoco deja repetir a la
+  // misma persona en dos slots (dos cartas de MAU, por ejemplo).
   const candidatos = (indice: number): Jugador[] => {
     if (!plantillaActiva) return []
     const usadosEnOtros = asignados.filter((id, i) => id && i !== indice) as string[]
+    const personasUsadas = new Set(
+      usadosEnOtros.map((id) => jugadorPorId(id)).filter((j): j is Jugador => !!j).map(personaDe),
+    )
+    const rolFormacion = plantillaActiva.formacion ? slots[indice]?.role : undefined
+    const posicionExigida = plantillaActiva.requisitos[indice]?.posicion ?? rolFormacion
     return Object.entries(guardado.coleccion)
       .map(([id, cantidad]) => ({ jugador: jugadorPorId(id), cantidad }))
-      .filter((x) => x.jugador && cumpleSlot(x.jugador, plantillaActiva, indice))
+      .filter((x): x is { jugador: Jugador; cantidad: number } => !!x.jugador)
+      .filter((x) => !posicionExigida || posicionesDe(x.jugador).includes(posicionExigida))
+      .filter((x) => !personasUsadas.has(personaDe(x.jugador)))
       // Una SBC solo gasta copias de más: la última de cada carta no se ofrece.
-      .filter((x) => x.cantidad > usadosEnOtros.filter((u) => u === x.jugador!.id).length + 1)
-      .map((x) => x.jugador!)
+      .filter((x) => x.cantidad > usadosEnOtros.filter((u) => u === x.jugador.id).length + 1)
+      .map((x) => x.jugador)
       .sort((a, b) => b.media - a.media)
   }
 
@@ -122,8 +153,40 @@ export function Sbc({ onVolver }: Props) {
 
   const agregados = plantillaActiva?.requisitosAgregados ?? []
   const jugadores = jugadoresAsignados()
-  const agregadosOk = agregados.every((r) => cumpleAgregado(r, jugadores))
-  const completa = !!plantillaActiva && asignados.every(Boolean) && agregadosOk
+
+  // Cuántas cartas hay que poner: si la plantilla no fija un mínimo/máximo propio,
+  // por defecto hay que llenar todos los puestos (como siempre); si fija uno de
+  // los dos, el otro no restringe (0 de piso, o todos los puestos de techo).
+  const minimoAgregado = agregados.find((r): r is Extract<RequisitoAgregado, { tipo: 'cantidadMinima' }> => r.tipo === 'cantidadMinima')
+  const maximoAgregado = agregados.find((r): r is Extract<RequisitoAgregado, { tipo: 'cantidadMaxima' }> => r.tipo === 'cantidadMaxima')
+  const totalSlots = plantillaActiva?.requisitos.length ?? 0
+  const minimoEfectivo = minimoAgregado?.minimo ?? (maximoAgregado ? 0 : totalSlots)
+  const maximoEfectivo = maximoAgregado?.maximo ?? totalSlots
+  const cantidadOk = jugadores.length >= minimoEfectivo && jugadores.length <= maximoEfectivo
+
+  const completaPorSlot = !plantillaActiva
+    ? false
+    : plantillaActiva.requisitos.every((_, i) => {
+        const id = asignados[i]
+        if (!id) return true
+        const jugador = jugadorPorId(id)
+        return !!jugador && cumpleSlot(jugador, plantillaActiva, i)
+      })
+
+  const agregadosOtros = agregados.filter((r) => r.tipo !== 'cantidadMinima' && r.tipo !== 'cantidadMaxima')
+  const agregadosOk = agregadosOtros.every((r) => cumpleAgregado(r, jugadores, slots, asignados))
+  const completa = !!plantillaActiva && cantidadOk && completaPorSlot && agregadosOk
+
+  const filaCantidad = {
+    texto:
+      minimoEfectivo === maximoEfectivo
+        ? `Exactamente ${minimoEfectivo} jugador${minimoEfectivo === 1 ? '' : 'es'}`
+        : maximoEfectivo >= totalSlots
+          ? `Mínimo ${minimoEfectivo} jugador${minimoEfectivo === 1 ? '' : 'es'}`
+          : `Entre ${minimoEfectivo} y ${maximoEfectivo} jugadores`,
+    ok: cantidadOk,
+  }
+  const filasRequisitos = [filaCantidad, ...agregadosOtros.map((r) => ({ texto: textoAgregado(r), ok: cumpleAgregado(r, jugadores, slots, asignados) }))]
 
   const confirmar = () => {
     if (!plantillaActiva || !completa) return
@@ -149,7 +212,6 @@ export function Sbc({ onVolver }: Props) {
 
   // Plantilla abierta: cancha real si tiene formación, si no la fila genérica de siempre.
   if (plantillaActiva) {
-    const slots = plantillaActiva.formacion ? FORMACIONES[plantillaActiva.formacion] ?? [] : []
     const usaCancha = slots.length > 0
 
     return (
@@ -191,21 +253,14 @@ export function Sbc({ onVolver }: Props) {
               )}
 
               <div className={`draft__banco sbc__panel-requisitos${requisitosAbierto ? ' draft__banco--abierto' : ''}`}>
-                {agregados.map((req, i) => {
-                  const ok = cumpleAgregado(req, jugadores)
-                  return (
-                    <div key={i} className="sbc__requisito-fila">
-                      <span className={`sbc__requisito-circulo${ok ? ' sbc__requisito-circulo--ok' : ''}`}>{ok ? '✓' : ''}</span>
-                      <span>{textoAgregado(req)}</span>
-                    </div>
-                  )
-                })}
-                {agregados.length === 0 && (
-                  <div className="sbc__requisito-fila">
-                    <span className="sbc__requisito-circulo sbc__requisito-circulo--ok">✓</span>
-                    <span>Completá los {slots.length} puestos de la formación.</span>
+                {filasRequisitos.map((fila, i) => (
+                  <div key={i} className="sbc__requisito-fila">
+                    <span className={`sbc__requisito-circulo${fila.ok ? ' sbc__requisito-circulo--ok' : ''}`}>
+                      {fila.ok ? '✓' : ''}
+                    </span>
+                    <span>{fila.texto}</span>
                   </div>
-                )}
+                ))}
               </div>
             </div>
           </div>
@@ -265,7 +320,7 @@ export function Sbc({ onVolver }: Props) {
                   </button>
                 ))}
                 {candidatos(eligiendo).length === 0 && (
-                  <p className="sbc__picker-vacio">No tenés cartas repetidas que cumplan este requisito.</p>
+                  <p className="sbc__picker-vacio">No tenés repetidas de esa posición disponibles.</p>
                 )}
               </div>
               {asignados[eligiendo] && (
@@ -325,7 +380,7 @@ export function Sbc({ onVolver }: Props) {
                 onClick={() => !hecha && abrirPlantilla(plantilla)}
               >
                 {hecha && <span className="sbc-plantilla__check">✓</span>}
-                <span className="sbc-plantilla__dificultad">{plantilla.dificultad}</span>
+                <span className="sbc-plantilla__dificultad">DIFICULTAD: {plantilla.dificultad.toUpperCase()}</span>
                 <h4>{plantilla.nombre}</h4>
                 <div className="sbc-plantilla__premios">
                   {plantilla.recompensaSobres.map((r) => (

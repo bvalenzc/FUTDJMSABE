@@ -630,5 +630,21 @@
       "fis": 94
     },
     "foto": "garin"
+  },
+  {
+    "id": "rai",
+    "nombre": "RAI",
+    "posicion": "ARQ",
+    "tipo": "plantel",
+    "tipoStats": "arquero",
+    "media": 82,
+    "stats": {
+      "est": 80,
+      "par": 83,
+      "saq": 81,
+      "ref": 83,
+      "vel": 78,
+      "col": 73
+    }
   }
 ]

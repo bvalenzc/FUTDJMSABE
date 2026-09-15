@@ -691,32 +691,34 @@
   --sub-color: #8c6b1e;
 }
 
+/* JUGADOR 8 D'OR: mismo espíritu "leyenda" que Don Julio D'Or (oro + guilloché),
+   pero en rojo/granate en vez de azul, para que no se confundan a simple vista. */
 .carta[data-rareza='8dor'] {
-  --c1: #4e7fc4;
-  --c2: #26518f;
-  --c3: #123061;
-  --c4: #0a1d3f;
-  --c5: #040d22;
+  --c1: #c9584a;
+  --c2: #8f2818;
+  --c3: #5c130a;
+  --c4: #2e0704;
+  --c5: #100201;
   --engrave: #e3c069;
   --engrave-op: 0.34;
   --engrave-blend: screen;
   --turn: rgba(227, 192, 105, 0.05);
   --foil: 0.34;
-  --fig-body: #040d22;
+  --fig-body: #100201;
   --fig-rim: #e3c069;
   --fig-rim-op: 0.28;
-  --scrim-0: rgba(4, 13, 34, 0);
-  --scrim-1: rgba(4, 13, 34, 0.38);
-  --scrim-2: rgba(3, 10, 26, 0.74);
-  --scrim-3: rgba(2, 7, 18, 0.93);
-  --scrimtop: rgba(78, 127, 196, 0.35);
+  --scrim-0: rgba(16, 2, 1, 0);
+  --scrim-1: rgba(16, 2, 1, 0.38);
+  --scrim-2: rgba(12, 2, 1, 0.74);
+  --scrim-3: rgba(8, 1, 1, 0.93);
+  --scrimtop: rgba(196, 88, 74, 0.35);
   --orn-dark: #e3c069;
-  --orn-light: #8fb8ec;
+  --orn-light: #e8a08f;
   --ink: #f1d993;
-  --ink-soft: #8fb8ec;
-  --ink-glow: rgba(4, 13, 34, 0.7);
+  --ink-soft: #e8a08f;
+  --ink-glow: rgba(16, 2, 1, 0.7);
   --name-main: #f6e6b4;
-  --name-sub: rgba(143, 184, 236, 0.92);
+  --name-sub: rgba(232, 160, 143, 0.92);
   --rule: rgba(227, 192, 105, 0.85);
   --divider: rgba(227, 192, 105, 0.5);
   --footer: rgba(227, 192, 105, 0.7);
