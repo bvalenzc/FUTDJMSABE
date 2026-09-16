@@ -1,14 +1,20 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { FORMACIONES, sobrePorId, type SlotFormacion } from '../../config/juego'
-import { GRUPO_DJM, copaInfo, type EquipoLiga, type GrupoLiga } from '../../config/liga'
+import { GRUPO_DJM, copaInfo, equipoLigaGlobalPorId, type Copa, type EquipoLiga, type GrupoLiga } from '../../config/liga'
 import { grupoPorId } from '../../config/liga'
 import {
+  aplicarResultadoCopa,
   aplicarResultadoDeFecha,
   clasificacion,
   djmEsLocal,
+  nombreRonda,
+  proximoPartidoCopaDjm,
+  recompensaCopaAlAzar,
   rivalDeFecha,
   type LigaGuardado,
+  type RecompensaCopa,
   type ResultadoPartido,
+  type RondaCopa,
 } from '../../juego/liga'
 import { jugadorPorId } from '../../juego/roster'
 import { useJuego } from '../../juego/useJuego'
@@ -21,7 +27,15 @@ import { Pantalla } from '../../components/Pantalla/Pantalla'
 import type { Jugador, StatsArquero, StatsCampo } from '../../types/jugador'
 import './Partido.css'
 
-type Recompensa = { monedas: number; packs: string[]; mvpId: string | null }
+type RecompensaCopaInfo = {
+  ronda: RondaCopa
+  penales: boolean
+  avanza: boolean
+  campeon: boolean
+  campeonNombre: string | null
+  premio: RecompensaCopa | null
+}
+type Recompensa = { monedas: number; packs: string[]; mvpId: string | null; copa: RecompensaCopaInfo | null }
 
 type Props = { onVolver: () => void; onFin: () => void }
 
@@ -93,17 +107,35 @@ export function Partido({ onVolver, onFin }: Props) {
   const [partido] = useState(() => {
     const liga = guardado.liga
     const grupo = liga ? grupoPorId(GRUPO_DJM) : undefined
-    const rival = grupo && liga ? rivalDeFecha(grupo, liga.jornada) : null
     const equipo = liga?.equipoPendiente ?? null
+
+    if (liga?.fase === 'copas') {
+      const proximo = liga.copaDjm ? proximoPartidoCopaDjm(liga.copaDjm) : null
+      return {
+        grupo,
+        rival: proximo ? equipoLigaGlobalPorId(proximo.rivalId) ?? null : null,
+        equipo,
+        jornada: 0,
+        local: proximo?.djmLocal ?? true,
+        esCopa: true,
+        copaId: liga.copaDjm?.copa ?? null,
+        rondaCopa: proximo?.ronda ?? null,
+      }
+    }
+
+    const rival = grupo && liga ? rivalDeFecha(grupo, liga.jornada) : null
     return {
       grupo,
       rival,
       equipo,
       jornada: liga?.jornada ?? 0,
       local: grupo && liga ? djmEsLocal(grupo, liga.jornada) : true,
+      esCopa: false,
+      copaId: null as Copa | null,
+      rondaCopa: null as RondaCopa | null,
     }
   })
-  const { grupo, rival, equipo, jornada, local } = partido
+  const { grupo, rival, equipo, jornada, local, esCopa, copaId, rondaCopa } = partido
 
   const [titulares, titularesSet] = useState<(string | null)[]>(equipo?.titulares ?? [])
   const [suplentes, suplentesSet] = useState<(string | null)[]>(equipo?.suplentes ?? [])
@@ -132,7 +164,7 @@ export function Partido({ onVolver, onFin }: Props) {
   if (!grupo || !rival || !equipo) {
     return (
       <Pantalla titulo="Liga" onVolver={onVolver}>
-        <p className="partido__vacio">No hay ningún equipo listo. Volvé a la liga y terminá un draft primero.</p>
+        <p className="partido__vacio">No hay ningún partido pendiente. Volvé a la liga.</p>
       </Pantalla>
     )
   }
@@ -322,15 +354,39 @@ export function Partido({ onVolver, onFin }: Props) {
     if (yaRecompenso.current || !guardado.liga) return
     yaRecompenso.current = true
 
-    const resultadoDjm: ResultadoPartido = local
-      ? { jornada, local: 'djm', visita: rival.id, golesLocal: golesDjm, golesVisita: golesRival }
-      : { jornada, local: rival.id, visita: 'djm', golesLocal: golesRival, golesVisita: golesDjm }
-    const nuevaLiga = aplicarResultadoDeFecha(guardado.liga, resultadoDjm, GRUPO_DJM)
-    guardarResultadoLiga(nuevaLiga)
+    // En copa no hay empates: si el marcador quedó igual, se define por penales
+    // (un desempate tipo Elo, igual que el que usan los cruces que no controla el jugador).
+    let djmAvanza = golesDjm > golesRival
+    let penales = false
+    if (esCopa && golesDjm === golesRival) {
+      penales = true
+      djmAvanza = Math.random() < clamp(sigmoide(equipo.media - rival.poder, 40), 0.15, 0.85)
+    }
 
-    const gano = golesDjm > golesRival
-    const empato = golesDjm === golesRival
-    const monedas = gano ? 20000 : empato ? 8000 : 3000
+    let copaResultado: RecompensaCopaInfo | null = null
+
+    if (esCopa && guardado.liga.copaDjm) {
+      const nuevaCopa = aplicarResultadoCopa(guardado.liga.copaDjm, golesDjm, golesRival, djmAvanza)
+      const premio = nuevaCopa.campeon === 'djm' ? recompensaCopaAlAzar() : null
+      copaResultado = {
+        ronda: rondaCopa!,
+        penales,
+        avanza: djmAvanza,
+        campeon: nuevaCopa.campeon === 'djm',
+        campeonNombre: !djmAvanza && nuevaCopa.campeon ? equipoLigaGlobalPorId(nuevaCopa.campeon)?.nombre ?? null : null,
+        premio,
+      }
+      guardarResultadoLiga({ ...guardado.liga, copaDjm: nuevaCopa, equipoPendiente: null })
+    } else {
+      const resultadoDjm: ResultadoPartido = local
+        ? { jornada, local: 'djm', visita: rival.id, golesLocal: golesDjm, golesVisita: golesRival }
+        : { jornada, local: rival.id, visita: 'djm', golesLocal: golesRival, golesVisita: golesDjm }
+      guardarResultadoLiga(aplicarResultadoDeFecha(guardado.liga, resultadoDjm, GRUPO_DJM))
+    }
+
+    const gano = esCopa ? djmAvanza : golesDjm > golesRival
+    const empato = !esCopa && golesDjm === golesRival
+    let monedas = gano ? 20000 : empato ? 8000 : 3000
     agregarMonedas(monedas)
     const bolsa = gano ? PACKS_GANA : PACKS_PIERDE
     const cantidad = 1 + Math.floor(Math.random() * 3)
@@ -339,6 +395,16 @@ export function Partido({ onVolver, onFin }: Props) {
       const id = bolsa[Math.floor(Math.random() * bolsa.length)]
       agregarSobres(id, 1)
       packs.push(id)
+    }
+
+    if (copaResultado?.premio) {
+      const premio = copaResultado.premio
+      agregarMonedas(premio.monedas)
+      monedas += premio.monedas
+      agregarSobres('seme_fue_larga', premio.seMeFueLarga)
+      agregarSobres('djm', premio.djm)
+      for (let i = 0; i < premio.seMeFueLarga; i++) packs.push('seme_fue_larga')
+      for (let i = 0; i < premio.djm; i++) packs.push('djm')
     }
 
     let mvpId: string | null = null
@@ -350,7 +416,7 @@ export function Partido({ onVolver, onFin }: Props) {
       }
     }
 
-    recompensaSet({ monedas, packs, mvpId })
+    recompensaSet({ monedas, packs, mvpId, copa: copaResultado })
     faseSet('recompensa')
   }
 
@@ -382,10 +448,18 @@ export function Partido({ onVolver, onFin }: Props) {
   const listoParaMostrar = fase === 'jugando' && evento && minutoMostrado === evento.minuto
 
   return (
-    <Pantalla titulo={`Liga · Fecha ${jornada}`} onVolver={fase === 'recompensa' ? undefined : onVolver}>
+    <Pantalla
+      titulo={esCopa && copaId && rondaCopa ? `${copaInfo(copaId).nombre} · ${nombreRonda(rondaCopa)}` : `Liga · Fecha ${jornada}`}
+      onVolver={fase === 'recompensa' ? undefined : onVolver}
+    >
       {fase === 'previa' && (
         <div className="partido__previa">
           <div className="partido__previa-cesped" aria-hidden="true" />
+          {esCopa && copaId && rondaCopa && (
+            <span className="eyebrow partido__previa-copa" style={{ color: copaInfo(copaId).color }}>
+              {copaInfo(copaId).nombre.toUpperCase()} · {nombreRonda(rondaCopa).toUpperCase()}
+            </span>
+          )}
           <div className="partido__previa-lado">
             <EscudoEquipo equipo={{ id: 'djm', nombre: 'Don Julio De Milan', esDjm: true, poder: equipo.media }} tamano={84} />
             <strong>DJM</strong>
@@ -504,6 +578,7 @@ export function Partido({ onVolver, onFin }: Props) {
               <strong>
                 {golesDjm > golesRival ? 'GANASTE' : golesDjm === golesRival ? 'EMPATASTE' : 'PERDISTE'} {golesDjm}-{golesRival}
               </strong>
+              {esCopa && golesDjm === golesRival && <span className="partido__fin-penales">Se define por penales</span>}
               <button type="button" className="boton-oro" onClick={terminarYRecompensar}>
                 VER RECOMPENSA
               </button>
@@ -603,13 +678,31 @@ function PantallaRecompensa({
 }) {
   const filas = clasificacion(grupo, liga.tablas[grupo.id])
   const terminada = liga.fase === 'copas'
-  const copaDjm = liga.copas?.['djm']
+  const copaAsignada = liga.copas?.['djm']
   const mvp = recompensa.mvpId ? jugadorPorId(recompensa.mvpId) : null
+  const copa = recompensa.copa
+  // `liga.copaDjm` ya viene actualizado con el resultado que se acaba de jugar, así
+  // que sirve para saber qué sigue (próximo cruce, o si ya no queda nada por jugar).
+  const proximoTrasEsto = copa && liga.copaDjm ? proximoPartidoCopaDjm(liga.copaDjm) : null
+
+  const eyebrow = copa
+    ? copa.avanza
+      ? copa.penales
+        ? 'GANASTE POR PENALES'
+        : 'VICTORIA'
+      : copa.penales
+        ? 'ELIMINADO POR PENALES'
+        : 'ELIMINADO'
+    : golesDjm > golesRival
+      ? 'VICTORIA'
+      : golesDjm === golesRival
+        ? 'EMPATE'
+        : 'DERROTA'
 
   return (
     <div className="partido__recompensa">
       <p className="eyebrow">
-        {golesDjm > golesRival ? 'VICTORIA' : golesDjm === golesRival ? 'EMPATE' : 'DERROTA'} ANTE {rival.nombre.toUpperCase()}
+        {eyebrow} ANTE {rival.nombre.toUpperCase()}
       </p>
       <strong className="partido__recompensa-marcador">
         {golesDjm} - {golesRival}
@@ -638,24 +731,60 @@ function PantallaRecompensa({
         </div>
       </div>
 
-      <p className="rotulo" style={{ marginTop: 18 }}>
-        Tabla · Grupo {grupo.nombre}
-      </p>
-      <div className="tarjeta partido__tabla-mini">
-        {filas.map((fila, i) => (
-          <div key={fila.id} className={`partido__tabla-mini-fila${fila.equipo.esDjm ? ' partido__tabla-mini-fila--djm' : ''}`}>
-            <span>{i + 1}</span>
-            <EscudoEquipo equipo={fila.equipo} tamano={18} />
-            <span className="partido__tabla-mini-nombre">{fila.equipo.nombre}</span>
-            <span className="partido__tabla-mini-pts">{fila.pts} pts</span>
+      {!copa && (
+        <>
+          <p className="rotulo" style={{ marginTop: 18 }}>
+            Tabla · Grupo {grupo.nombre}
+          </p>
+          <div className="tarjeta partido__tabla-mini">
+            {filas.map((fila, i) => (
+              <div key={fila.id} className={`partido__tabla-mini-fila${fila.equipo.esDjm ? ' partido__tabla-mini-fila--djm' : ''}`}>
+                <span>{i + 1}</span>
+                <EscudoEquipo equipo={fila.equipo} tamano={18} />
+                <span className="partido__tabla-mini-nombre">{fila.equipo.nombre}</span>
+                <span className="partido__tabla-mini-pts">{fila.pts} pts</span>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </>
+      )}
 
-      {terminada && copaDjm && (
-        <div className="liga__final" style={{ borderColor: copaInfo(copaDjm).color, marginTop: 14 }}>
+      {!copa && terminada && copaAsignada && (
+        <div className="liga__final" style={{ borderColor: copaInfo(copaAsignada).color, marginTop: 14 }}>
           <span className="rotulo">Fase de grupos terminada</span>
-          <strong style={{ color: copaInfo(copaDjm).color }}>Clasificaste a {copaInfo(copaDjm).nombre}</strong>
+          <strong style={{ color: copaInfo(copaAsignada).color }}>Clasificaste a {copaInfo(copaAsignada).nombre}</strong>
+        </div>
+      )}
+
+      {copa && liga.copaDjm && (
+        <div
+          className={`partido__copa-resultado${copa.campeon ? ' partido__copa-resultado--campeon' : ''}`}
+          style={{ borderColor: copaInfo(liga.copaDjm.copa).color }}
+        >
+          {copa.campeon ? (
+            <>
+              <span className="rotulo">🏆 CAMPEÓN</span>
+              <strong style={{ color: copaInfo(liga.copaDjm.copa).color }}>
+                ¡Ganaste la {copaInfo(liga.copaDjm.copa).nombre}!
+              </strong>
+            </>
+          ) : copa.avanza ? (
+            <>
+              <span className="rotulo">Avanzaste de ronda</span>
+              {proximoTrasEsto ? (
+                <strong>
+                  Ahora: {nombreRonda(proximoTrasEsto.ronda)} vs {equipoLigaGlobalPorId(proximoTrasEsto.rivalId)?.nombre}
+                </strong>
+              ) : (
+                <strong>Seguís en carrera</strong>
+              )}
+            </>
+          ) : (
+            <>
+              <span className="rotulo">Quedaste eliminado en {nombreRonda(copa.ronda)}</span>
+              {copa.campeonNombre && <strong>Campeón: {copa.campeonNombre}</strong>}
+            </>
+          )}
         </div>
       )}
 

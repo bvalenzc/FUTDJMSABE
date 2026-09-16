@@ -1,12 +1,20 @@
 import type { DraftGuardado } from './estado'
-import { GRUPOS_LIGA, type Copa, type EquipoLiga, type GrupoLiga, grupoPorId, jornadasTotales } from '../config/liga'
+import {
+  GRUPOS_LIGA,
+  type Copa,
+  type EquipoLiga,
+  type GrupoLiga,
+  equipoLigaGlobalPorId,
+  grupoPorId,
+  jornadasTotales,
+} from '../config/liga'
 
 export type FilaTabla = { pj: number; g: number; e: number; p: number; gf: number; gc: number; pts: number }
 
 export type ResultadoPartido = { jornada: number; local: string; visita: string; golesLocal: number; golesVisita: number }
 
 /** Versión del formato: si el guardado viejo no calza, se descarta y arranca una liga nueva. */
-export const VERSION_LIGA = 2
+export const VERSION_LIGA = 3
 
 export type LigaGuardado = {
   version: typeof VERSION_LIGA
@@ -20,6 +28,8 @@ export type LigaGuardado = {
   equipoPendiente: DraftGuardado | null
   /** equipoId -> copa asignada, calculada una sola vez al terminar la fase de grupos. */
   copas: Record<string, Copa> | null
+  /** la llave de la copa de Don Julio De Milan, con cuartos/semis/final ya sorteados. */
+  copaDjm: CopaGuardado | null
 }
 
 const FILA_VACIA: FilaTabla = { pj: 0, g: 0, e: 0, p: 0, gf: 0, gc: 0, pts: 0 }
@@ -35,7 +45,16 @@ export function ligaInicial(): LigaGuardado {
     tablas[grupo.id] = tabla
     resultados[grupo.id] = []
   })
-  return { version: VERSION_LIGA, tablas, resultados, jornada: 1, fase: 'grupos', equipoPendiente: null, copas: null }
+  return {
+    version: VERSION_LIGA,
+    tablas,
+    resultados,
+    jornada: 1,
+    fase: 'grupos',
+    equipoPendiente: null,
+    copas: null,
+    copaDjm: null,
+  }
 }
 
 /** Encuentros de una fecha: método del círculo, con el equipo 0 fijo. */
@@ -173,6 +192,230 @@ export function asignarCopas(tablas: Record<string, Record<string, FilaTabla>>):
   return mapa
 }
 
+/* ================= COPAS: cuartos, semis y final ================= */
+
+export type RondaCopa = 'octavos' | 'cuartos' | 'semis' | 'final'
+
+export type PartidoCopa = {
+  /** null mientras el rival de esa llave todavía no se define (ronda futura). */
+  local: string | null
+  visita: string | null
+  golesLocal: number | null
+  golesVisita: number | null
+  /** si el marcador quedó empatado, quién se lo llevó por penales: los cruces
+   *  simulados nunca empatan, así que esto solo puede pasar en el que juega el usuario. */
+  penalesGanador?: string | null
+}
+
+export type RondaCopaJugada = { ronda: RondaCopa; partidos: PartidoCopa[] }
+
+export type CopaGuardado = {
+  copa: Copa
+  rondas: RondaCopaJugada[]
+  /** ronda en la que quedó afuera; null mientras sigue viva o hasta que se define. */
+  eliminadoEn: RondaCopa | null
+  /** equipoId campeón, recién se llena cuando se juega la final. */
+  campeon: string | null
+  recompensaReclamada: boolean
+}
+
+/** Recompensa por ganar la copa entera: packs al azar y monedas redondas de a 1.000. */
+export type RecompensaCopa = { seMeFueLarga: number; djm: number; monedas: number }
+
+export function recompensaCopaAlAzar(): RecompensaCopa {
+  return {
+    seMeFueLarga: 2 + Math.floor(Math.random() * 3),
+    djm: 2 + Math.floor(Math.random() * 3),
+    monedas: (200 + Math.floor(Math.random() * 301)) * 1000,
+  }
+}
+
+/**
+ * Orden de siembra clásico de un cuadro de eliminación (1-8, 4-5, 2-7, 3-6 para 8
+ * equipos, y así doblando para 16): asegura que las mejores posiciones no se crucen
+ * hasta la final.
+ */
+function ordenSiembra(n: number): number[] {
+  if (n <= 1) return [1]
+  const previo = ordenSiembra(n / 2)
+  const resultado: number[] = []
+  previo.forEach((s) => resultado.push(s, n + 1 - s))
+  return resultado
+}
+
+function rondasParaTamano(n: number): RondaCopa[] {
+  return n >= 16 ? ['octavos', 'cuartos', 'semis', 'final'] : ['cuartos', 'semis', 'final']
+}
+
+/**
+ * Arma la llave de una copa completa: siembra a sus equipos según cómo terminaron
+ * la fase de grupos (mismo criterio que separa las copas) y deja listas todas las
+ * rondas, las que siguen con `local`/`visita` en null hasta que se sepa quién avanza.
+ */
+export function armarLlaveCopa(
+  copaId: Copa,
+  mapaCopas: Record<string, Copa>,
+  tablas: Record<string, Record<string, FilaTabla>>,
+): CopaGuardado {
+  const filas: FilaClasificacion[] = []
+  GRUPOS_LIGA.forEach((grupo) => {
+    clasificacion(grupo, tablas[grupo.id])
+      .filter((f) => mapaCopas[f.id] === copaId)
+      .forEach((f) => filas.push(f))
+  })
+  filas.sort(compararEntreGrupos)
+
+  const siembra = ordenSiembra(filas.length)
+  const equiposEnOrden = siembra.map((puesto) => filas[puesto - 1].id)
+  const nombresRonda = rondasParaTamano(filas.length)
+
+  const primeraRonda: PartidoCopa[] = []
+  for (let j = 0; j < equiposEnOrden.length; j += 2) {
+    primeraRonda.push({ local: equiposEnOrden[j], visita: equiposEnOrden[j + 1] ?? null, golesLocal: null, golesVisita: null })
+  }
+
+  const rondasJugadas: RondaCopaJugada[] = [{ ronda: nombresRonda[0], partidos: primeraRonda }]
+  for (let i = 1; i < nombresRonda.length; i++) {
+    const cantidad = rondasJugadas[i - 1].partidos.length / 2
+    rondasJugadas.push({ ronda: nombresRonda[i], partidos: Array.from({ length: cantidad }, vacioCopa) })
+  }
+
+  return { copa: copaId, rondas: rondasJugadas, eliminadoEn: null, campeon: null, recompensaReclamada: false }
+}
+
+function vacioCopa(): PartidoCopa {
+  return { local: null, visita: null, golesLocal: null, golesVisita: null }
+}
+
+/** Sigmoide chica solo para desempatar penales/alargue cuando la copa da igualdad. */
+function sigmoideCopa(diferencia: number): number {
+  return 1 / (1 + Math.pow(10, -diferencia / 40))
+}
+
+/** Simula un cruce de copa entre dos equipos que no controla el jugador: nunca
+ *  puede terminar empatado, así que un resultado parejo se desempata como si fuera
+ *  penales, con más chance para el que tiene más poder. */
+export function simularPartidoCopa(local: EquipoLiga, visita: EquipoLiga): { golesLocal: number; golesVisita: number } {
+  let golesLocal = golesAlAzar(local.poder, visita.poder)
+  let golesVisita = golesAlAzar(visita.poder, local.poder)
+  if (golesLocal === golesVisita) {
+    const probLocal = clampCopa(sigmoideCopa(local.poder - visita.poder))
+    if (Math.random() < probLocal) golesLocal += 1
+    else golesVisita += 1
+  }
+  return { golesLocal, golesVisita }
+}
+
+function clampCopa(n: number): number {
+  return Math.min(0.9, Math.max(0.1, n))
+}
+
+function ganadorDe(p: PartidoCopa): string | null {
+  if (p.golesLocal === null || p.golesVisita === null) return null
+  if (p.golesLocal === p.golesVisita) return p.penalesGanador ?? null
+  return p.golesLocal > p.golesVisita ? p.local : p.visita
+}
+
+/** Vuelca a los ganadores de una ronda ya completa en los cruces de la siguiente. */
+function propagarGanadores(rondas: RondaCopaJugada[], indice: number) {
+  if (indice + 1 >= rondas.length) return
+  const actual = rondas[indice].partidos
+  const siguiente = rondas[indice + 1].partidos
+  siguiente.forEach((p, j) => {
+    p.local = ganadorDe(actual[j * 2])
+    p.visita = ganadorDe(actual[j * 2 + 1])
+  })
+}
+
+/** Juega (simulado) todos los cruces de una ronda que todavía no tengan resultado. */
+function completarRonda(rondas: RondaCopaJugada[], indice: number) {
+  rondas[indice].partidos.forEach((p) => {
+    if (p.golesLocal !== null || !p.local || !p.visita) return
+    const eqLocal = equipoLigaGlobalPorId(p.local)
+    const eqVisita = equipoLigaGlobalPorId(p.visita)
+    if (!eqLocal || !eqVisita) return
+    const r = simularPartidoCopa(eqLocal, eqVisita)
+    p.golesLocal = r.golesLocal
+    p.golesVisita = r.golesVisita
+  })
+}
+
+function indiceRondaActualDjm(rondas: RondaCopaJugada[]): number {
+  return rondas.findIndex((r) => r.partidos.some((p) => (p.local === 'djm' || p.visita === 'djm') && p.golesLocal === null))
+}
+
+export function nombreRonda(ronda: RondaCopa): string {
+  if (ronda === 'octavos') return 'Octavos de Final'
+  if (ronda === 'cuartos') return 'Cuartos de Final'
+  if (ronda === 'semis') return 'Semifinal'
+  return 'Final'
+}
+
+/** El próximo cruce de copa que le toca jugar a DJM, o null si ya está afuera o ya salió campeón. */
+export function proximoPartidoCopaDjm(copaGuardado: CopaGuardado): { ronda: RondaCopa; djmLocal: boolean; rivalId: string } | null {
+  if (copaGuardado.eliminadoEn || copaGuardado.campeon) return null
+  const i = indiceRondaActualDjm(copaGuardado.rondas)
+  if (i < 0) return null
+  const p = copaGuardado.rondas[i].partidos.find((x) => x.local === 'djm' || x.visita === 'djm')
+  if (!p) return null
+  const djmLocal = p.local === 'djm'
+  const rivalId = djmLocal ? p.visita : p.local
+  if (!rivalId) return null
+  return { ronda: copaGuardado.rondas[i].ronda, djmLocal, rivalId }
+}
+
+/**
+ * Aplica el resultado que jugó el usuario en su cruce de copa. Si ganó, completa el
+ * resto de esa ronda (simulado) y deja armada la siguiente; si esa era la final,
+ * corona campeón a DJM. Si perdió, queda eliminado ahí mismo y se simula de una
+ * todo lo que falta del cuadro para saber quién termina siendo el campeón.
+ *
+ * `djmGanoOverride` sirve para cuando el partido terminó empatado y quien lo llama
+ * ya resolvió un desempate (penales): así el marcador real queda guardado en la
+ * llave tal cual se jugó, sin inventar un resultado distinto para forzar un ganador.
+ */
+export function aplicarResultadoCopa(
+  copaGuardado: CopaGuardado,
+  golesDjm: number,
+  golesRival: number,
+  djmGanoOverride?: boolean,
+): CopaGuardado {
+  const rondas: RondaCopaJugada[] = copaGuardado.rondas.map((r) => ({ ronda: r.ronda, partidos: r.partidos.map((p) => ({ ...p })) }))
+  const i = indiceRondaActualDjm(rondas)
+  if (i < 0) return copaGuardado
+
+  const partidoDjm = rondas[i].partidos.find((p) => p.local === 'djm' || p.visita === 'djm')!
+  if (partidoDjm.local === 'djm') {
+    partidoDjm.golesLocal = golesDjm
+    partidoDjm.golesVisita = golesRival
+  } else {
+    partidoDjm.golesLocal = golesRival
+    partidoDjm.golesVisita = golesDjm
+  }
+  if (golesDjm === golesRival && djmGanoOverride !== undefined) {
+    const rivalId = partidoDjm.local === 'djm' ? partidoDjm.visita : partidoDjm.local
+    partidoDjm.penalesGanador = djmGanoOverride ? 'djm' : rivalId
+  }
+
+  completarRonda(rondas, i)
+  const djmGano = djmGanoOverride ?? golesDjm > golesRival
+
+  if (!djmGano) {
+    for (let k = i; k < rondas.length; k++) {
+      propagarGanadores(rondas, k)
+      if (k + 1 < rondas.length) completarRonda(rondas, k + 1)
+    }
+    const campeon = ganadorDe(rondas[rondas.length - 1].partidos[0])
+    return { ...copaGuardado, rondas, eliminadoEn: rondas[i].ronda, campeon }
+  }
+
+  if (i + 1 >= rondas.length) {
+    return { ...copaGuardado, rondas, campeon: 'djm' }
+  }
+  propagarGanadores(rondas, i)
+  return { ...copaGuardado, rondas }
+}
+
 /** Aplica el resultado de Don Julio De Milan y simula de una la fecha completa de los 5 grupos. */
 export function aplicarResultadoDeFecha(liga: LigaGuardado, resultadoDjm: ResultadoPartido, grupoDjmId: string): LigaGuardado {
   const tablas: Record<string, Record<string, FilaTabla>> = {}
@@ -193,6 +436,7 @@ export function aplicarResultadoDeFecha(liga: LigaGuardado, resultadoDjm: Result
   const total = jornadasTotales(grupoPorId(grupoDjmId)!)
   const terminoLaFase = siguienteJornada > total
   const copas = terminoLaFase ? asignarCopas(tablas) : null
+  const copaDjm = terminoLaFase && copas ? armarLlaveCopa(copas['djm'], copas, tablas) : null
 
   return {
     ...liga,
@@ -202,5 +446,6 @@ export function aplicarResultadoDeFecha(liga: LigaGuardado, resultadoDjm: Result
     fase: terminoLaFase ? 'copas' : 'grupos',
     equipoPendiente: null,
     copas,
+    copaDjm,
   }
 }

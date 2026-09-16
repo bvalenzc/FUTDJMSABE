@@ -185,6 +185,100 @@
   letter-spacing: 0.6px;
 }
 
+/* ---------- llave de copa ---------- */
+
+.liga__copa {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.liga__copa-cabecera {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid;
+  border-radius: var(--r-medio);
+  background: var(--superficie);
+  text-align: center;
+}
+
+.liga__copa-cabecera strong {
+  font-family: 'Anton', sans-serif;
+  font-size: 16px;
+  letter-spacing: 0.5px;
+}
+
+.liga__copa-ronda {
+  overflow: hidden;
+  padding: 10px 0;
+}
+
+.liga__copa-ronda-titulo {
+  margin: 0 0 6px;
+  padding: 0 12px;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-align: center;
+  color: var(--texto-tenue);
+}
+
+.liga__copa-partido {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--borde);
+  font-size: 11px;
+  color: var(--texto-medio);
+}
+
+.liga__copa-partido:last-child {
+  border-bottom: none;
+}
+
+.liga__copa-partido--djm {
+  color: var(--texto);
+  font-weight: 700;
+  background: linear-gradient(90deg, rgba(232, 197, 101, 0.14), transparent 70%);
+}
+
+.liga__copa-equipo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.liga__copa-equipo--visita {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+.liga__copa-equipo em {
+  font-style: normal;
+  color: var(--texto-tenue);
+}
+
+.liga__copa-marcador {
+  font-weight: 800;
+  color: var(--oro-claro);
+  white-space: nowrap;
+}
+
+.liga__copa-marcador em {
+  font-style: normal;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--texto-tenue);
+}
+
 .liga__reiniciar {
   display: block;
   margin: 22px auto 4px;

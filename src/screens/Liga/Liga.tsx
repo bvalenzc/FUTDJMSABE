@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { GRUPOS_LIGA, GRUPO_DJM, copaInfo, jornadasTotales, type Copa } from '../../config/liga'
-import { clasificacion } from '../../juego/liga'
+import { GRUPOS_LIGA, GRUPO_DJM, copaInfo, equipoLigaGlobalPorId, jornadasTotales, type Copa } from '../../config/liga'
+import { clasificacion, nombreRonda, proximoPartidoCopaDjm, type CopaGuardado, type PartidoCopa } from '../../juego/liga'
 import { useJuego } from '../../juego/useJuego'
 import { EscudoEquipo } from '../../components/EscudoEquipo/EscudoEquipo'
 import { Pantalla } from '../../components/Pantalla/Pantalla'
@@ -111,11 +111,8 @@ export function Liga({ onVolver, onJugarFecha }: Props) {
 
       {esGrupoDjm && (
         <div className="liga__accion">
-          {temporadaTerminada && copaDjm ? (
-            <div className="liga__final" style={{ borderColor: copaInfo(copaDjm).color }}>
-              <span className="rotulo">Fase de grupos terminada</span>
-              <strong style={{ color: copaInfo(copaDjm).color }}>Clasificaste a {copaInfo(copaDjm).nombre}</strong>
-            </div>
+          {temporadaTerminada && copaDjm && liga.copaDjm ? (
+            <LlaveCopa copaDjm={liga.copaDjm} tieneEquipoPendiente={!!liga.equipoPendiente} onJugar={onJugarFecha} />
           ) : liga.equipoPendiente ? (
             <button type="button" className="boton-oro liga__boton-fecha" onClick={onJugarFecha}>
               FECHA {liga.jornada}
@@ -130,5 +127,94 @@ export function Liga({ onVolver, onJugarFecha }: Props) {
         Reiniciar liga desde cero
       </button>
     </Pantalla>
+  )
+}
+
+/** Llave completa de la copa de Don Julio De Milan: una ronda debajo de la otra, con
+ *  el cruce de DJM resaltado, más el botón para jugar el que sigue (o el cartel de
+ *  campeón/eliminado una vez que ya no queda nada por jugar). */
+function LlaveCopa({
+  copaDjm,
+  tieneEquipoPendiente,
+  onJugar,
+}: {
+  copaDjm: CopaGuardado
+  tieneEquipoPendiente: boolean
+  onJugar: () => void
+}) {
+  const info = copaInfo(copaDjm.copa)
+  const proximo = proximoPartidoCopaDjm(copaDjm)
+  const campeonNombre = copaDjm.campeon ? equipoLigaGlobalPorId(copaDjm.campeon)?.nombre : null
+
+  return (
+    <div className="liga__copa">
+      <div className="liga__copa-cabecera" style={{ borderColor: info.color }}>
+        <span className="rotulo">Fase de grupos terminada</span>
+        <strong style={{ color: info.color }}>{info.nombre}</strong>
+      </div>
+
+      {copaDjm.rondas.map((ronda) => (
+        <div key={ronda.ronda} className="liga__copa-ronda tarjeta">
+          <p className="liga__copa-ronda-titulo">{nombreRonda(ronda.ronda).toUpperCase()}</p>
+          {ronda.partidos.map((partido, i) => (
+            <FilaPartidoCopa key={i} partido={partido} />
+          ))}
+        </div>
+      ))}
+
+      {copaDjm.campeon === 'djm' ? (
+        <div className="liga__final" style={{ borderColor: info.color }}>
+          <span className="rotulo">🏆 Campeón</span>
+          <strong style={{ color: info.color }}>¡Ganaste la {info.nombre}!</strong>
+        </div>
+      ) : copaDjm.eliminadoEn ? (
+        <div className="liga__final" style={{ borderColor: info.color }}>
+          <span className="rotulo">Quedaste eliminado en {nombreRonda(copaDjm.eliminadoEn)}</span>
+          {campeonNombre && <strong>Campeón: {campeonNombre}</strong>}
+        </div>
+      ) : proximo && tieneEquipoPendiente ? (
+        <button type="button" className="boton-oro liga__boton-fecha" onClick={onJugar}>
+          JUGAR {nombreRonda(proximo.ronda).toUpperCase()}
+        </button>
+      ) : proximo ? (
+        <p className="liga__pista">Terminá un draft nuevo para jugar {nombreRonda(proximo.ronda).toLowerCase()}.</p>
+      ) : null}
+    </div>
+  )
+}
+
+function FilaPartidoCopa({ partido }: { partido: PartidoCopa }) {
+  const local = partido.local ? equipoLigaGlobalPorId(partido.local) : null
+  const visita = partido.visita ? equipoLigaGlobalPorId(partido.visita) : null
+  const jugado = partido.golesLocal !== null && partido.golesVisita !== null
+  const esDjm = partido.local === 'djm' || partido.visita === 'djm'
+
+  return (
+    <div className={`liga__copa-partido${esDjm ? ' liga__copa-partido--djm' : ''}`}>
+      <span className="liga__copa-equipo">
+        {local ? (
+          <>
+            <EscudoEquipo equipo={local} tamano={20} />
+            {local.nombre}
+          </>
+        ) : (
+          <em>Por definir</em>
+        )}
+      </span>
+      <span className="liga__copa-marcador">
+        {jugado ? `${partido.golesLocal}-${partido.golesVisita}` : 'vs'}
+        {partido.penalesGanador && <em> (pen)</em>}
+      </span>
+      <span className="liga__copa-equipo liga__copa-equipo--visita">
+        {visita ? (
+          <>
+            {visita.nombre}
+            <EscudoEquipo equipo={visita} tamano={20} />
+          </>
+        ) : (
+          <em>Por definir</em>
+        )}
+      </span>
+    </div>
   )
 }

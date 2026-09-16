@@ -99,6 +99,16 @@ export function equipoLigaPorId(grupo: GrupoLiga, id: string): EquipoLiga | unde
   return grupo.equipos.find((e) => e.id === id)
 }
 
+/** Busca un equipo en cualquiera de los 5 grupos: hace falta para la copa, donde
+ *  los cruces mezclan equipos que en la fase de grupos nunca se habían visto. */
+export function equipoLigaGlobalPorId(id: string): EquipoLiga | undefined {
+  for (const grupo of GRUPOS_LIGA) {
+    const encontrado = grupo.equipos.find((e) => e.id === id)
+    if (encontrado) return encontrado
+  }
+  return undefined
+}
+
 /** Fechas totales de la fase de grupos: todos contra todos, una vez. */
 export function jornadasTotales(grupo: GrupoLiga): number {
   return grupo.equipos.length - 1
