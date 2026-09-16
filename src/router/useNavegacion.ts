@@ -15,6 +15,8 @@ export type Pantalla =
   | { tipo: 'drafts' }
   | { tipo: 'liga' }
   | { tipo: 'partido' }
+  | { tipo: 'plantillas' }
+  | { tipo: 'casino' }
 
 const INICIO: Pantalla = { tipo: 'inicio' }
 

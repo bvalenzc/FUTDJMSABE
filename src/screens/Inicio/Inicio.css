@@ -1,8 +1,8 @@
-/* El menú entra completo en una pantalla: banner + 6 mosaicos + acceso admin. */
+/* El menú entra completo en una pantalla: banner + 8 mosaicos + acceso admin. */
 .inicio {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 8px;
   height: 100%;
   padding: 10px 12px 6px;
 }
@@ -12,8 +12,8 @@
   min-height: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: repeat(3, 1fr);
-  gap: 9px;
+  grid-template-rows: repeat(4, 1fr);
+  gap: 8px;
 }
 
 /* Acceso al panel de cartas, al pie, como el "+ admin" del proyecto anterior. */

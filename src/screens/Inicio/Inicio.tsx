@@ -6,7 +6,7 @@ import { useJuego } from '../../juego/useJuego'
 import { Banner } from './Banner'
 import './Inicio.css'
 
-type Destino = 'coleccion' | 'tienda' | 'draft' | 'sbc' | 'mercado' | 'miequipo' | 'packs' | 'admin'
+type Destino = 'coleccion' | 'tienda' | 'draft' | 'sbc' | 'mercado' | 'miequipo' | 'packs' | 'admin' | 'plantillas' | 'casino'
 
 type Props = {
   jugadores: Jugador[]
@@ -65,6 +65,18 @@ export function Inicio({ jugadores, onIr }: Props) {
             onClick={() => onIr('sbc')}
           >
             <IconoMosaico clave="sbc" />
+          </Mosaico>
+
+          <Mosaico
+            titulo="Plantillas"
+            etiqueta={guardado.plantillasGuardadas.length > 0 ? `${guardado.plantillasGuardadas.length} guardadas` : undefined}
+            onClick={() => onIr('plantillas')}
+          >
+            <IconoMosaico clave="plantillas" />
+          </Mosaico>
+
+          <Mosaico titulo="Casino" onClick={() => onIr('casino')}>
+            <IconoMosaico clave="casino" />
           </Mosaico>
         </div>
 

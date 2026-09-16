@@ -14,6 +14,8 @@ import { Draft } from './screens/Draft/Draft'
 import { Sbc } from './screens/Sbc/Sbc'
 import { Liga } from './screens/Liga/Liga'
 import { Partido } from './screens/Partido/Partido'
+import { Plantillas } from './screens/Plantillas/Plantillas'
+import { Casino } from './screens/Casino/Casino'
 import './App.css'
 
 function Juego() {
@@ -42,6 +44,10 @@ function Juego() {
       return <Draft onVolver={volver} onIrLiga={() => ir({ tipo: 'liga' })} />
     case 'sbc':
       return <Sbc onVolver={volver} />
+    case 'plantillas':
+      return <Plantillas onVolver={volver} />
+    case 'casino':
+      return <Casino onVolver={volver} />
     case 'liga':
       return <Liga onVolver={volver} onJugarFecha={() => ir({ tipo: 'partido' })} />
     case 'partido':

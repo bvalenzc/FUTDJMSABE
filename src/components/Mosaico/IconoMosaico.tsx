@@ -1,6 +1,6 @@
 import './IconoMosaico.css'
 
-export type ClaveIcono = 'packs' | 'equipo' | 'tienda' | 'cartas' | 'mercado' | 'sbc'
+export type ClaveIcono = 'packs' | 'equipo' | 'tienda' | 'cartas' | 'mercado' | 'sbc' | 'plantillas' | 'casino' | 'ruleta' | 'candado'
 
 /** Emblema de cada botón del menú: línea dorada sobre un disco grabado. */
 export function IconoMosaico({ clave }: { clave: ClaveIcono }) {
@@ -62,6 +62,42 @@ const DIBUJOS: Record<ClaveIcono, React.ReactNode> = {
   sbc: (
     <>
       <path d="M12 14h15.5a4.5 4.5 0 1 1 9 0H52v15.5a4.5 4.5 0 1 0 0 9V54H36.5a4.5 4.5 0 1 0-9 0H12V38.5a4.5 4.5 0 1 1 0-9z" />
+    </>
+  ),
+  // Portapapeles con lista: tus formaciones guardadas
+  plantillas: (
+    <>
+      <path d="M20 12h24a3 3 0 0 1 3 3v37a3 3 0 0 1-3 3H20a3 3 0 0 1-3-3V15a3 3 0 0 1 3-3z" />
+      <rect x="25" y="8" width="14" height="8" rx="2.5" />
+      <path d="M22 27h20 M22 35h20 M22 43h12" opacity="0.6" />
+    </>
+  ),
+  // Dado de cinco puntos
+  casino: (
+    <>
+      <rect x="14" y="14" width="36" height="36" rx="7" />
+      <circle cx="24" cy="24" r="2.3" fill="currentColor" stroke="none" />
+      <circle cx="40" cy="24" r="2.3" fill="currentColor" stroke="none" />
+      <circle cx="32" cy="32" r="2.3" fill="currentColor" stroke="none" />
+      <circle cx="24" cy="40" r="2.3" fill="currentColor" stroke="none" />
+      <circle cx="40" cy="40" r="2.3" fill="currentColor" stroke="none" />
+    </>
+  ),
+  // Ruleta: disco con rayos
+  ruleta: (
+    <>
+      <circle cx="32" cy="32" r="21" />
+      <circle cx="32" cy="32" r="4" />
+      <path d="M32 11v8 M32 45v8 M11 32h8 M45 32h8 M18 18l5.5 5.5 M40.5 40.5 46 46 M46 18l-5.5 5.5 M23.5 40.5 18 46" opacity="0.6" />
+    </>
+  ),
+  // Candado: "próximamente"
+  candado: (
+    <>
+      <rect x="16" y="28" width="32" height="26" rx="4" />
+      <path d="M22 28v-6a10 10 0 0 1 20 0v6" />
+      <circle cx="32" cy="39" r="3.2" />
+      <path d="M32 42v6" />
     </>
   ),
 }

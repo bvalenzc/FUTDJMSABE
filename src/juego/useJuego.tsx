@@ -1,5 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { escribirGuardado, GUARDADO_INICIAL, leerGuardado, type DraftGuardado, type Guardado } from './estado'
+import {
+  escribirGuardado,
+  GUARDADO_INICIAL,
+  leerGuardado,
+  type DraftGuardado,
+  type Guardado,
+  type PlantillaGuardada,
+} from './estado'
 import { ligaInicial, type LigaGuardado } from './liga'
 import { sincronizarPropias } from './roster'
 import type { Jugador } from '../types/jugador'
@@ -16,6 +23,7 @@ type Acciones = {
   consumirSobre: (sobreId: string) => boolean
   guardarDraft: (draft: DraftGuardado) => void
   borrarDraft: (id: string) => void
+  guardarPlantilla: (plantilla: PlantillaGuardada) => void
   marcarPlantilla: (plantillaId: string) => void
   marcarSbcReclamado: (sbcId: string) => void
   registrarPackGratis: () => void
@@ -141,6 +149,17 @@ export function ProveedorJuego({ children }: { children: ReactNode }) {
     setGuardado((g) => ({ ...g, drafts: g.drafts.filter((d) => d.id !== id) }))
   }, [])
 
+  // Guarda nueva si el id no existía, o la reemplaza si ya se había guardado antes.
+  const guardarPlantilla = useCallback((plantilla: PlantillaGuardada) => {
+    setGuardado((g) => {
+      const existe = g.plantillasGuardadas.some((p) => p.id === plantilla.id)
+      const plantillasGuardadas = existe
+        ? g.plantillasGuardadas.map((p) => (p.id === plantilla.id ? plantilla : p))
+        : [plantilla, ...g.plantillasGuardadas].slice(0, 30)
+      return { ...g, plantillasGuardadas }
+    })
+  }, [])
+
   const marcarPlantilla = useCallback((plantillaId: string) => {
     setGuardado((g) => ({ ...g, plantillasHechas: { ...g.plantillasHechas, [plantillaId]: true } }))
   }, [])
@@ -203,6 +222,7 @@ export function ProveedorJuego({ children }: { children: ReactNode }) {
       consumirSobre,
       guardarDraft,
       borrarDraft,
+      guardarPlantilla,
       marcarPlantilla,
       marcarSbcReclamado,
       registrarPackGratis,
@@ -223,6 +243,7 @@ export function ProveedorJuego({ children }: { children: ReactNode }) {
       consumirSobre,
       guardarDraft,
       borrarDraft,
+      guardarPlantilla,
       marcarPlantilla,
       marcarSbcReclamado,
       registrarPackGratis,

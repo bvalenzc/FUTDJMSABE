@@ -1,0 +1,54 @@
+.casino__intro {
+  margin: 0;
+  padding: 14px 16px 4px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--texto-medio);
+}
+
+.casino__grilla {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 14px;
+}
+
+.casino__juego {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  aspect-ratio: 1;
+  padding: 16px;
+  border: 1px solid var(--borde);
+  border-radius: var(--r-medio);
+  background: linear-gradient(160deg, #201c15, #121009);
+  color: var(--oro-claro);
+  font-family: 'Anton', sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.8px;
+  cursor: pointer;
+  transition: transform 0.16s ease, border-color 0.16s ease;
+}
+
+.casino__juego:active {
+  transform: scale(0.97);
+  border-color: var(--borde-fuerte);
+}
+
+.casino__juego--bloqueado {
+  opacity: 0.45;
+  color: var(--texto-tenue);
+  cursor: default;
+}
+
+.casino__juego--bloqueado:active {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .casino__juego {
+    transition: none;
+  }
+}

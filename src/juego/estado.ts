@@ -8,6 +8,14 @@ export type DraftGuardado = {
   media: number
 }
 
+/** Un equipo armado a mano en el apartado PLANTILLAS, sin capitán ni banco. */
+export type PlantillaGuardada = {
+  id: string
+  fecha: number
+  formacion: string
+  titulares: (string | null)[]
+}
+
 import type { Jugador } from '../types/jugador'
 import { VERSION_LIGA, type LigaGuardado } from './liga'
 
@@ -20,6 +28,8 @@ export type Guardado = {
   /** id de sobre -> cantidad pendiente de abrir */
   misSobres: Record<string, number>
   drafts: DraftGuardado[]
+  /** equipos armados a mano en PLANTILLAS */
+  plantillasGuardadas: PlantillaGuardada[]
   /** id de plantilla SBC -> completada */
   plantillasHechas: Record<string, boolean>
   /** id de SBC -> recompensa final reclamada */
@@ -35,6 +45,7 @@ export const GUARDADO_INICIAL: Guardado = {
   coleccion: {},
   misSobres: { gratis: 1 },
   drafts: [],
+  plantillasGuardadas: [],
   plantillasHechas: {},
   sbcReclamados: {},
   ultimoPackGratis: null,
