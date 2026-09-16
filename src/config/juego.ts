@@ -199,6 +199,9 @@ export type PlantillaSbc = {
   /** Si viene, la plantilla se arma sobre la cancha de esa formación (un slot por posición)
    *  en vez de la fila genérica de requisitos sueltos. */
   formacion?: string
+  /** Si es true, los slots de la cancha no exigen la posición de su formación (para
+   *  plantillas tipo "EL IPAD" que piden más arqueros que slots de ARQ tiene la cancha). */
+  librePosicion?: boolean
   requisitos: RequisitoSbc[]
   requisitosAgregados?: RequisitoAgregado[]
   recompensaSobres: { sobreId: string; cantidad: number }[]
@@ -321,6 +324,7 @@ export const CATALOGO_SBC: Sbc[] = [
         nombre: 'EL IPAD',
         dificultad: 'Media',
         formacion: '1-2-3-1',
+        librePosicion: true,
         requisitos: [{}, {}, {}, {}, {}, {}, {}],
         requisitosAgregados: [
           { tipo: 'cantidadMaxima', maximo: 5 },

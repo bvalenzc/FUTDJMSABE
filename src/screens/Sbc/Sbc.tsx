@@ -34,7 +34,7 @@ function cumpleSlot(jugador: Jugador, plantilla: PlantillaSbc, indice: number): 
   const requisito: RequisitoSbc = plantilla.requisitos[indice] ?? {}
   if (requisito.jugadorId && jugador.id !== requisito.jugadorId) return false
   if (requisito.mediaMinima && jugador.media < requisito.mediaMinima) return false
-  const rolFormacion = plantilla.formacion ? FORMACIONES[plantilla.formacion]?.[indice]?.role : undefined
+  const rolFormacion = plantilla.formacion && !plantilla.librePosicion ? FORMACIONES[plantilla.formacion]?.[indice]?.role : undefined
   const posicionExigida = requisito.posicion ?? rolFormacion
   if (posicionExigida && !posicionesDe(jugador).includes(posicionExigida)) return false
   return true
@@ -167,7 +167,7 @@ export function Sbc({ onVolver }: Props) {
     const personasUsadas = new Set(
       usadosEnOtros.map((id) => jugadorPorId(id)).filter((j): j is Jugador => !!j).map(personaDe),
     )
-    const rolFormacion = plantillaActiva.formacion ? slots[indice]?.role : undefined
+    const rolFormacion = plantillaActiva.formacion && !plantillaActiva.librePosicion ? slots[indice]?.role : undefined
     const posicionExigida = plantillaActiva.requisitos[indice]?.posicion ?? rolFormacion
     return Object.entries(guardado.coleccion)
       .map(([id, cantidad]) => ({ jugador: jugadorPorId(id), cantidad }))
@@ -268,7 +268,11 @@ export function Sbc({ onVolver }: Props) {
                     style={{ left: `${posicionEnCancha(slot).x}%`, top: `${posicionEnCancha(slot).y}%` }}
                     onClick={() => tocarSlot(i)}
                   >
-                    {jugador ? <Carta jugador={jugador} tamano={64} /> : <span className="draft__slot-vacio">{slot.role}</span>}
+                    {jugador ? (
+                      <Carta jugador={jugador} tamano={64} />
+                    ) : (
+                      <span className="draft__slot-vacio">{plantillaActiva.librePosicion ? '+' : slot.role}</span>
+                    )}
                     {moviendo && (
                       <span
                         className="sbc__borrar-slot"
@@ -371,7 +375,13 @@ export function Sbc({ onVolver }: Props) {
         {eligiendo !== null && (
           <div className="sbc__picker" onClick={() => eligiendoSet(null)}>
             <div className="sbc__picker-caja" onClick={(e) => e.stopPropagation()}>
-              <h2>{usaCancha ? slots[eligiendo]?.role : textoRequisitoSlot(plantillaActiva.requisitos[eligiendo])}</h2>
+              <h2>
+                {usaCancha
+                  ? plantillaActiva.librePosicion
+                    ? 'Cualquier posición'
+                    : slots[eligiendo]?.role
+                  : textoRequisitoSlot(plantillaActiva.requisitos[eligiendo])}
+              </h2>
               <div className="sbc__picker-grilla">
                 {candidatos(eligiendo).map((j) => (
                   <button
@@ -388,7 +398,11 @@ export function Sbc({ onVolver }: Props) {
                   </button>
                 ))}
                 {candidatos(eligiendo).length === 0 && (
-                  <p className="sbc__picker-vacio">No tenés repetidas de esa posición disponibles.</p>
+                  <p className="sbc__picker-vacio">
+                    {usaCancha && plantillaActiva.librePosicion
+                      ? 'No te quedan repetidas disponibles.'
+                      : 'No tenés repetidas de esa posición disponibles.'}
+                  </p>
                 )}
               </div>
             </div>
