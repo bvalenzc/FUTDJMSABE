@@ -100,6 +100,7 @@ export function Sbc({ onVolver }: Props) {
   const [plantillaActiva, plantillaActivaSet] = useState<PlantillaSbc | null>(null)
   const [asignados, asignadosSet] = useState<(string | null)[]>([])
   const [eligiendo, eligiendoSet] = useState<number | null>(null)
+  const [seleccion, seleccionSet] = useState<number | null>(null)
   const [requisitosAbierto, requisitosAbiertoSet] = useState(false)
   const [aviso, avisoSet] = useState<string | null>(null)
 
@@ -112,12 +113,46 @@ export function Sbc({ onVolver }: Props) {
     plantillaActivaSet(plantilla)
     asignadosSet(Array(plantilla.requisitos.length).fill(null))
     requisitosAbiertoSet(false)
+    seleccionSet(null)
   }
 
   const cerrarPlantilla = () => {
     plantillaActivaSet(null)
     requisitosAbiertoSet(false)
     eligiendoSet(null)
+    seleccionSet(null)
+  }
+
+  // Tocar una carta ya puesta la deja "parpadeando" (movible); tocar cualquier
+  // otro puesto la mueve ahí (intercambiando si ese puesto también tenía carta).
+  // Tocar un puesto vacío sin nada seleccionado abre el selector de siempre.
+  const tocarSlot = (indice: number) => {
+    if (seleccion !== null) {
+      if (seleccion === indice) {
+        seleccionSet(null)
+        return
+      }
+      const nuevos = [...asignados]
+      ;[nuevos[indice], nuevos[seleccion]] = [nuevos[seleccion], nuevos[indice]]
+      asignadosSet(nuevos)
+      seleccionSet(null)
+      return
+    }
+    if (asignados[indice]) {
+      seleccionSet(indice)
+      return
+    }
+    eligiendoSet(indice)
+  }
+
+  // Saca la carta parpadeando de la plantilla: no la borra de Mi Equipo ni
+  // impide volver a elegirla, solo deja ese puesto vacío de nuevo.
+  const quitarSeleccionado = () => {
+    if (seleccion === null) return
+    const nuevos = [...asignados]
+    nuevos[seleccion] = null
+    asignadosSet(nuevos)
+    seleccionSet(null)
   }
 
   const slots = plantillaActiva?.formacion ? FORMACIONES[plantillaActiva.formacion] ?? [] : []
@@ -224,15 +259,29 @@ export function Sbc({ onVolver }: Props) {
               {slots.map((slot, i) => {
                 const id = asignados[i]
                 const jugador = id ? jugadorPorId(id) : null
+                const moviendo = seleccion === i
                 return (
                   <button
                     key={i}
                     type="button"
-                    className="draft__slot"
+                    className={`draft__slot${moviendo ? ' sbc__slot--moviendo' : ''}`}
                     style={{ left: `${posicionEnCancha(slot).x}%`, top: `${posicionEnCancha(slot).y}%` }}
-                    onClick={() => eligiendoSet(i)}
+                    onClick={() => tocarSlot(i)}
                   >
                     {jugador ? <Carta jugador={jugador} tamano={64} /> : <span className="draft__slot-vacio">{slot.role}</span>}
+                    {moviendo && (
+                      <span
+                        className="sbc__borrar-slot"
+                        role="button"
+                        aria-label="Quitar del slot"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          quitarSeleccionado()
+                        }}
+                      >
+                        🗑️
+                      </span>
+                    )}
                   </button>
                 )
               })}
@@ -275,10 +324,29 @@ export function Sbc({ onVolver }: Props) {
               {plantillaActiva.requisitos.map((req, i) => {
                 const id = asignados[i]
                 const jugador = id ? jugadorPorId(id) : null
+                const moviendo = seleccion === i
                 return (
-                  <button key={i} type="button" className="sbc__requisito" onClick={() => eligiendoSet(i)}>
+                  <button
+                    key={i}
+                    type="button"
+                    className={`sbc__requisito${moviendo ? ' sbc__slot--moviendo' : ''}`}
+                    onClick={() => tocarSlot(i)}
+                  >
                     {jugador ? <Carta jugador={jugador} tamano={96} /> : <span className="sbc__hueco">+</span>}
                     <span className="sbc__req-texto">{textoRequisitoSlot(req)}</span>
+                    {moviendo && (
+                      <span
+                        className="sbc__borrar-slot"
+                        role="button"
+                        aria-label="Quitar del slot"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          quitarSeleccionado()
+                        }}
+                      >
+                        🗑️
+                      </span>
+                    )}
                   </button>
                 )
               })}
@@ -323,20 +391,6 @@ export function Sbc({ onVolver }: Props) {
                   <p className="sbc__picker-vacio">No tenés repetidas de esa posición disponibles.</p>
                 )}
               </div>
-              {asignados[eligiendo] && (
-                <button
-                  type="button"
-                  className="sbc__quitar"
-                  onClick={() => {
-                    const nuevos = [...asignados]
-                    nuevos[eligiendo] = null
-                    asignadosSet(nuevos)
-                    eligiendoSet(null)
-                  }}
-                >
-                  Quitar del slot
-                </button>
-              )}
             </div>
           </div>
         )}

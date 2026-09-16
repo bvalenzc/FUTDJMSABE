@@ -203,6 +203,7 @@
 }
 
 .sbc__requisito {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -425,5 +426,45 @@
 @media (prefers-reduced-motion: reduce) {
   .sbc__lengueta-enviar {
     animation: none;
+  }
+}
+
+/* ---------- mover una carta ya puesta: parpadea y se puede tocar otro puesto ---------- */
+
+@keyframes sbc-parpadeo {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.32;
+  }
+}
+
+.sbc__slot--moviendo {
+  animation: sbc-parpadeo 0.9s ease-in-out infinite;
+}
+
+.sbc__borrar-slot {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--rojo-claro);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6), 0 0 0 2px #0a0908;
+  font-size: 13px;
+  line-height: 1;
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sbc__slot--moviendo {
+    animation: none;
+    opacity: 0.6;
   }
 }
